@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  clerkId            String    @unique
+  stripeCustomerId   String?   @unique
+  subscriptionStatus String    @default("none")
+  credits            Int       @default(0)
+  usageLogs          UsageLog[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+model UsageLog {
+  id        String   @id @default(cuid())
+  userId    String
+  prompt    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
