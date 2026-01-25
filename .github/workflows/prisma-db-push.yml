@@ -22,6 +22,16 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Prisma db push (create/update tables)
+      - name: Debug DATABASE_URL prefix (safe)
+
+        run: |
+
+          node -e "const u=process.env.DATABASE_URL||""; console.log("DATABASE_URL prefix:", u.slice(0, 12)); console.log("Has postgresql://", u.startsWith("postgresql://"));"
+
+        env:
+
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
         run: npx prisma db push --accept-data-loss
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
