@@ -12,9 +12,9 @@ const isWebhookRoute = createRouteMatcher([
   "/api/billing/webhook(.*)",
 ]);
 
-export default clerkMiddleware((auth, req) => {
+export default clerkMiddleware(async (auth, req) => {
   if (isWebhookRoute(req)) return;
-  if (isProtectedRoute(req)) auth().protect();
+  if (isProtectedRoute(req)) (await auth()).protect();
 });
 
 export const config = {
