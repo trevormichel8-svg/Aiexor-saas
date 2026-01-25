@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { ensureUser } from "@/lib/credits";
 
 export async function POST() {
-  const { userId } = auth();
+  const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const user = await ensureUser(userId);
