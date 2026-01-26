@@ -11,10 +11,10 @@
   --bg-color: #000; /* dark background */
   --surface-color: #0a0a0a; /* slightly lighter for cards */
   --text-color: #ffffff ; /* teal text */
-  --text-shadow: #00ffee ; /* white text shadow */
+  --text-shadow: #1af00e ; /* white text shadow */
   /* Replace neon green with teal throughout the app. The new
      accent colour is used for icons, borders and glows. */
-  --teal: #ffffff ; /* teal */
+  --teal: #f00ea5 ; /* teal */
   --rainbow-shadow: #00ffee ; /* white shadow */
   --radius-pill: 24px;
   --radius-round: 50%;
