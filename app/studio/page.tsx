@@ -63,7 +63,9 @@ export default function StudioPage() {
       "Graffiti","Anime","Manga","Pixel Art","8-bit","Steampunk","Cyberpunk","Fantasy","Sci-Fi",
       "Noir","Gothic","Nature","Wildlife","Portrait","Landscape","Seascape","Cityscape","Caricature",
       "Watercolor","Oil Painting","Acrylic","Ink Drawing","Charcoal","Pastel","Geometric","Kawaii","Retro",
-      "Vintage","Psychedelic","Horror"
+      "Vintage","Psychedelic","Horror","Stencil","Indigenous","Coloring Book","Comic","Photo Realistic","Highly Detailed",
+      "Silhouette","Mosaic","Realistic Anime","Vibrant","Epic Origami","Abstract Curves","CGI","Black&White","3D Shading",
+      "Quilling","Candy"
     ],
     []
   );
