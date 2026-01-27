@@ -7,5 +7,8 @@ export async function GET() {
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const user = await ensureUser(userId);
-  return NextResponse.json({ credits: user.credits });
+  return NextResponse.json({
+    credits: user.credits,
+    subscriptionStatus: user.subscriptionStatus,
+  });
 }

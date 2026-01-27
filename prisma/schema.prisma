@@ -8,20 +8,34 @@ datasource db {
 }
 
 model User {
-  id                 String    @id @default(cuid())
-  clerkId            String    @unique
-  stripeCustomerId   String?   @unique
-  subscriptionStatus String    @default("none")
-  credits            Int       @default(0)
+  id                 String       @id @default(cuid())
+  clerkId            String       @unique
+  stripeCustomerId   String?      @unique
+  subscriptionStatus String       @default("none")
+  credits            Int          @default(0)
   usageLogs          UsageLog[]
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  generations        Generation[]
 }
 
 model UsageLog {
   id        String   @id @default(cuid())
   userId    String
   prompt    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model Generation {
+  id        String   @id @default(cuid())
+  userId    String
+  prompt    String
+  provider  String
+  image     String   @db.Text
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

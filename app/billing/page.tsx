@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
-import { PageCard } from "../components/PageCard";
+import { PageCard } from "@/app/components/PageCard";
 
 export default function BillingPage() {
   const [loading, setLoading] = useState(false);
@@ -13,8 +14,8 @@ export default function BillingPage() {
     try {
       const res = await fetch("/api/billing/checkout", { method: "POST" });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((json as any)?.error ?? `Request failed: ${res.status}`);
-      window.location.href = (json as any).url;
+      if (!res.ok) throw new Error(json?.error ?? `Request failed: ${res.status}`);
+      window.location.href = json.url;
     } catch (e: any) {
       setError(e?.message ?? "Something went wrong");
       setLoading(false);
@@ -24,14 +25,19 @@ export default function BillingPage() {
   return (
     <PageCard title="Billing">
       <p style={{ opacity: 0.85, marginTop: 0 }}>
-        Subscribe to refill credits automatically.
+        Subscribe to refill credits automatically. Your credits show in the top-right.
       </p>
 
-      <button className="preset-btn" onClick={onSubscribe} disabled={loading} type="button">
-        {loading ? "Redirecting…" : "Subscribe"}
-      </button>
+      <div className="page-actions">
+        <button className="pill-link" onClick={() => void onSubscribe()} disabled={loading}>
+          {loading ? "Redirecting…" : "Subscribe"}
+        </button>
+        <Link className="pill-link" href="/studio">
+          Back to Studio
+        </Link>
+      </div>
 
-      {error && <p style={{ color: "crimson", marginTop: 10 }}>{error}</p>}
+      {error ? <p className="error-text">{error}</p> : null}
     </PageCard>
   );
 }

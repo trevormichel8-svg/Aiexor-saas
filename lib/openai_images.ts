@@ -11,64 +11,79 @@ const OpenAIImagesResponse = z.object({
 });
 
 function arrayBufferToBase64(buf: ArrayBuffer): string {
-  // Node.js (most Vercel serverless builds)
-  if (typeof Buffer !== "undefined") {
-    return Buffer.from(buf).toString("base64");
-  }
+  if (typeof Buffer !== "undefined") return Buffer.from(buf).toString("base64");
 
-  // Edge / browser fallback
   let binary = "";
   const bytes = new Uint8Array(buf);
   const chunkSize = 0x8000;
   for (let i = 0; i < bytes.length; i += chunkSize) {
     binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
   }
-  // btoa exists in edge/browser
+  // eslint-disable-next-line no-undef
   return btoa(binary);
 }
 
-export async function generateImageBase64(prompt: string): Promise<string> {
+async function requestOpenAI(body: Record<string, unknown>) {
   const res = await fetch("https://api.openai.com/v1/images/generations", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${env.OPENAI_API_KEY}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model: env.OPENAI_IMAGE_MODEL,
-      prompt,
-      size: "1024x1024",
-      // NOTE: Do NOT send response_format — OpenAI can reject it now.
-    }),
+    body: JSON.stringify(body),
   });
 
+  const json = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const msg = await res.text().catch(() => "");
-    throw new Error(`OpenAI error ${res.status}: ${msg.slice(0, 400)}`);
+    const msg = (json as any)?.error?.message ?? (json as any)?.message ?? (await res.text().catch(() => ""));
+    const err = new Error(String(msg).slice(0, 400)) as Error & { param?: string; status?: number };
+    err.param = (json as any)?.error?.param;
+    err.status = res.status;
+    throw err;
   }
 
-  const json = OpenAIImagesResponse.parse(await res.json());
+  return OpenAIImagesResponse.parse(json);
+}
 
-  // If OpenAI returns base64 directly
-  const b64 = json.data[0]?.b64_json;
-  if (b64) {
-    return `data:image/png;base64,${b64}`;
-  }
+/**
+ * Generate an image and return a data URL (base64).
+ * This is compatible with both older endpoints that accept `response_format`
+ * and newer ones that reject it (we retry without).
+ */
+export async function generateImageBase64(prompt: string): Promise<string> {
+  const baseBody: Record<string, unknown> = {
+    model: env.OPENAI_IMAGE_MODEL,
+    prompt,
+    size: "1024x1024",
+  };
 
-  // If OpenAI returns a URL, fetch it and convert to base64
-  const url = json.data[0]?.url;
-  if (url) {
-    const imgRes = await fetch(url);
-    if (!imgRes.ok) {
-      const msg = await imgRes.text().catch(() => "");
-      throw new Error(`OpenAI image fetch error ${imgRes.status}: ${msg.slice(0, 200)}`);
+  try {
+    const json = await requestOpenAI({ ...baseBody, response_format: "b64_json" });
+    const b64 = json.data[0]?.b64_json;
+    if (b64) return `data:image/png;base64,${b64}`;
+    const url = json.data[0]?.url;
+    if (url) {
+      const imgRes = await fetch(url);
+      const ct = imgRes.headers.get("content-type") || "image/png";
+      const buf = await imgRes.arrayBuffer();
+      return `data:${ct};base64,${arrayBufferToBase64(buf)}`;
     }
+    throw new Error("OpenAI returned no image data");
+  } catch (e: any) {
+    const msg = String(e?.message ?? "").toLowerCase();
+    const isResponseFormatIssue = e?.param === "response_format" || (msg.includes("unknown parameter") && msg.includes("response_format"));
+    if (!isResponseFormatIssue) throw e;
 
-    const ct = imgRes.headers.get("content-type") || "image/png";
-    const buf = await imgRes.arrayBuffer();
-    const imgB64 = arrayBufferToBase64(buf);
-    return `data:${ct};base64,${imgB64}`;
+    const json = await requestOpenAI(baseBody);
+    const b64 = json.data[0]?.b64_json;
+    if (b64) return `data:image/png;base64,${b64}`;
+    const url = json.data[0]?.url;
+    if (url) {
+      const imgRes = await fetch(url);
+      const ct = imgRes.headers.get("content-type") || "image/png";
+      const buf = await imgRes.arrayBuffer();
+      return `data:${ct};base64,${arrayBufferToBase64(buf)}`;
+    }
+    throw new Error("OpenAI returned no image data");
   }
-
-  throw new Error("OpenAI returned no image data (no b64_json or url)");
 }

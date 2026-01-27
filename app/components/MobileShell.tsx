@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { SignedIn, SignedOut, SignInButton, useClerk } from "@clerk/nextjs";
 import { UserMenuButton } from "./UserMenuButton";
@@ -52,13 +52,14 @@ function IconLogOut() {
     </svg>
   );
 }
-
-function pageName(pathname: string) {
-  if (pathname === "/") return "Home";
-  if (pathname.startsWith("/studio")) return "Studio";
-  if (pathname.startsWith("/billing")) return "Billing";
-  if (pathname.startsWith("/account")) return "Account";
-  return "Aiexor";
+function IconMenu() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 6h16" />
+      <path d="M4 12h16" />
+      <path d="M4 18h16" />
+    </svg>
+  );
 }
 
 function NavIcon({ icon }: { icon: NavItem["icon"] }) {
@@ -67,15 +68,20 @@ function NavIcon({ icon }: { icon: NavItem["icon"] }) {
   return <IconSparkles />;
 }
 
+function pageLabel(pathname: string) {
+  if (pathname.startsWith("/studio")) return "Studio";
+  if (pathname.startsWith("/billing")) return "Billing";
+  if (pathname.startsWith("/account")) return "Account";
+  return "Home";
+}
+
 export function MobileShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const clerk = useClerk();
-  const title = pageName(pathname);
 
-  useEffect(() => {
-    document.title = `Aiexor • ${title}`;
-  }, [title]);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement | null>(null);
 
   const items: NavItem[] = useMemo(
     () => [
@@ -86,6 +92,27 @@ export function MobileShell({ children }: { children: ReactNode }) {
     []
   );
 
+  useEffect(() => {
+    setOpen(false);
+    setMoreOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    document.title = `Aiexor • ${pageLabel(pathname)}`;
+  }, [pathname]);
+
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (!moreOpen) return;
+      const t = e.target as Node | null;
+      if (!t) return;
+      if (moreRef.current?.contains(t)) return;
+      setMoreOpen(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [moreOpen]);
+
   function isActive(href: string) {
     return pathname === href;
   }
@@ -94,33 +121,59 @@ export function MobileShell({ children }: { children: ReactNode }) {
     <div className="mobile-frame">
       <div className="top-bar">
         <div className="top-left">
-          <button className="hamburger" aria-label="Menu button" type="button" onClick={() => setOpen(true)}>
-            <span />
-            <span />
-            <span />
+          <button className="hamburger icon-button" aria-label="Menu" type="button" onClick={() => setOpen(true)}>
+            <IconMenu />
           </button>
-          <div className="app-label">{title}</div>
+          <div className="app-label">Aiexor</div>
         </div>
 
         <div className="top-right">
+          <SignedIn>
+            <CreditsPill />
+          </SignedIn>
+
           <SignedOut>
             <SignInButton mode="modal">
               <button id="sign-in-btn" className="icon-button" aria-label="Sign in" type="button">
                 <IconUser />
               </button>
             </SignInButton>
-            <button className="icon-button" aria-label="Secondary action" type="button">
-              <IconEllipsis />
-            </button>
           </SignedOut>
 
           <SignedIn>
-            <CreditsPill />
             <UserMenuButton />
-            <button className="icon-button" aria-label="Secondary action" type="button">
+          </SignedIn>
+
+          <div className="more-menu" ref={moreRef}>
+            <button className="icon-button" aria-label="More" type="button" onClick={() => setMoreOpen((v) => !v)}>
               <IconEllipsis />
             </button>
-          </SignedIn>
+
+            {moreOpen ? (
+              <div className="more-pop" role="menu" aria-label="More menu">
+                {items.map((it) => (
+                  <Link key={it.href} className="more-item" href={it.href} onClick={() => setMoreOpen(false)}>
+                    <NavIcon icon={it.icon} />
+                    <span>{it.label}</span>
+                  </Link>
+                ))}
+
+                <SignedIn>
+                  <button
+                    className="more-item"
+                    type="button"
+                    onClick={() => {
+                      setMoreOpen(false);
+                      clerk.signOut({ redirectUrl: "/" });
+                    }}
+                  >
+                    <IconLogOut />
+                    <span>Sign out</span>
+                  </button>
+                </SignedIn>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 

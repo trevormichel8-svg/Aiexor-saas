@@ -1,25 +1,48 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Provider = "openai" | "vertex";
+type Tab = "studio" | "history";
 
 type OutputCard = {
-  id: string;
+  key: string;
+  historyId?: string;
   prompt: string;
   provider: Provider;
   imageUrl?: string;
   status: "loading" | "ready" | "error";
   message?: string;
+  createdAt?: string;
+};
+
+type HistoryItem = {
+  id: string;
+  prompt: string;
+  provider: Provider | string;
+  image: string;
+  createdAt: string;
 };
 
 function uid() {
   return `${Date.now()}_${Math.random().toString(16).slice(2)}`;
 }
 
+function IconTrash() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 6h18" />
+      <path d="M8 6V4h8v2" />
+      <path d="M6 6l1 16h10l1-16" />
+      <path d="M10 11v7" />
+      <path d="M14 11v7" />
+    </svg>
+  );
+}
+
 function DownloadIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M12 5v12" />
       <polyline points="5 13 12 20 19 13" />
       <path d="M5 19h14" />
@@ -28,7 +51,7 @@ function DownloadIcon() {
 }
 function RemixIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <polyline points="23 4 23 10 17 10" />
       <polyline points="1 20 1 14 7 14" />
       <path d="M3.51 9a9 9 0 0 1 14.13-3.36l5.36 5.36" />
@@ -38,20 +61,32 @@ function RemixIcon() {
 }
 function BrushIcon() {
   return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="22" height="22" aria-hidden="true">
-      <path d="M15.825.12a.5.5 0 0 1 .132.584c-1.53 3.43-4.743 8.17-7.095 10.64a6.1 6.1 0 0 1-2.373 1.534c-.018.227-.06.538-.16.868-.201.659-.667 1.479-1.708 1.74a8.1 8.1 0 0 1-3.078.132 4 4 0 0 1-.562-.135 1.4 1.4 0 0 1-.466-.247.7.7 0 0 1-.204-.288.62.62 0 0 1 .004-.443c.095-.245.316-.38.461-.452.394-.197.625-.453.867-.826.095-.144.184-.297.287-.472l.117-.198c.33-.56.76-1.29 1.51-1.56.69-.247 1.4-.09 1.95.12.35.13.64.3.81.42.54-.23 1.02-.55 1.43-.95 2.35-2.47 5.56-7.21 7.09-10.64a.5.5 0 0 1 .584-.29z" />
-      <path d="M11.25 3.5l1.25 1.25" />
-      <path d="M3.5 12.5c.4.4 1.5.5 2.4-.4" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M14 3l7 7-9 9H5v-7l9-9z" />
+      <path d="M12 5l7 7" />
     </svg>
   );
 }
 function GenerateIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <rect x="3" y="3" width="18" height="14" rx="2" ry="2" />
       <circle cx="8.5" cy="8.5" r="1.5" />
       <polyline points="21 15 16 10 5 21" />
     </svg>
+  );
+}
+
+function LoadingLoop() {
+  return (
+    <div className="loading-loop" aria-label="Generating">
+      <div className="loading-ring" />
+      <div className="loading-dots" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
+    </div>
   );
 }
 
@@ -70,13 +105,49 @@ export default function StudioPage() {
     []
   );
 
+  const [tab, setTab] = useState<Tab>("studio");
   const [prompt, setPrompt] = useState("");
   const [provider, setProvider] = useState<Provider>("openai");
   const [styleOpen, setStyleOpen] = useState(false);
   const [cards, setCards] = useState<OutputCard[]>([]);
   const [busy, setBusy] = useState(false);
+  const [historyBusy, setHistoryBusy] = useState(false);
 
   const outputRef = useRef<HTMLDivElement | null>(null);
+
+  function scrollToTop() {
+    const el = outputRef.current;
+    if (!el) return;
+    el.scrollTop = 0;
+  }
+
+  async function fetchHistory() {
+    try {
+      setHistoryBusy(true);
+      const res = await fetch("/api/history", { cache: "no-store" });
+      if (!res.ok) return;
+      const json = (await res.json()) as { items?: HistoryItem[] };
+      const items = Array.isArray(json.items) ? json.items : [];
+      setCards(
+        items.map((g) => ({
+          key: g.id,
+          historyId: g.id,
+          prompt: g.prompt,
+          provider: (g.provider === "vertex" ? "vertex" : "openai") as Provider,
+          imageUrl: g.image,
+          status: "ready",
+          createdAt: g.createdAt,
+        }))
+      );
+      queueMicrotask(scrollToTop);
+    } finally {
+      setHistoryBusy(false);
+    }
+  }
+
+  useEffect(() => {
+    void fetchHistory();
+  }, []);
 
   async function callGenerate(p: string, prov: Provider) {
     const res = await fetch("/api/generate", {
@@ -85,14 +156,15 @@ export default function StudioPage() {
       body: JSON.stringify({
         prompt: p,
         provider: prov,
-        // Keep defaults aligned with your current UI; you can surface these later.
         aspectRatio: "1:1",
         sampleCount: 1,
         personGeneration: "allow_none",
       }),
     });
+
     const json = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(json?.error ?? `Request failed: ${res.status}`);
+
     const images: string[] = Array.isArray(json?.images)
       ? json.images
       : Array.isArray(json?.output)
@@ -100,14 +172,9 @@ export default function StudioPage() {
         : json?.image
           ? [json.image]
           : [];
-    if (images.length === 0) throw new Error("No image returned");
-    return images;
-  }
 
-  function scrollToBottom() {
-    const el = outputRef.current;
-    if (!el) return;
-    el.scrollTop = el.scrollHeight;
+    if (images.length === 0) throw new Error("No image returned");
+    return { images, generationId: json?.generationId as string | undefined };
   }
 
   async function generateNew(p: string, prov: Provider) {
@@ -115,20 +182,31 @@ export default function StudioPage() {
     if (!clean) return;
 
     setBusy(true);
-    const id = uid();
-    setCards((prev) => [...prev, { id, prompt: clean, provider: prov, status: "loading" }]);
-    queueMicrotask(scrollToBottom);
+
+    const key = uid();
+    setCards((prev) => [
+      { key, prompt: clean, provider: prov, status: "loading" },
+      ...prev,
+    ]);
+    queueMicrotask(scrollToTop);
 
     try {
-      const images = await callGenerate(clean, prov);
-      // Only render first result for now (your original UI shows one per card).
+      const { images, generationId } = await callGenerate(clean, prov);
       const first = images[0]!;
-      setCards((prev) => prev.map((c) => (c.id === id ? { ...c, imageUrl: first, status: "ready" } : c)));
-      queueMicrotask(scrollToBottom);
+      setCards((prev) =>
+        prev.map((c) =>
+          c.key === key
+            ? { ...c, imageUrl: first, status: "ready", historyId: generationId ?? c.historyId }
+            : c
+        )
+      );
+      setPrompt("");
+      setStyleOpen(false);
+      setTab("studio");
     } catch (e: any) {
       setCards((prev) =>
         prev.map((c) =>
-          c.id === id ? { ...c, status: "error", message: e?.message ?? "Failed to generate" } : c
+          c.key === key ? { ...c, status: "error", message: e?.message ?? "Failed to generate" } : c
         )
       );
     } finally {
@@ -136,20 +214,12 @@ export default function StudioPage() {
     }
   }
 
-  async function remix(cardId: string) {
-    setCards((prev) => prev.map((c) => (c.id === cardId ? { ...c, status: "loading" } : c)));
-    const card = cards.find((c) => c.id === cardId);
+  async function remix(cardKey: string) {
+    const card = cards.find((c) => c.key === cardKey);
     if (!card) return;
 
-    try {
-      const images = await callGenerate(card.prompt, provider);
-      const first = images[0]!;
-      setCards((prev) => prev.map((c) => (c.id === cardId ? { ...c, imageUrl: first, status: "ready" } : c)));
-    } catch (e: any) {
-      setCards((prev) =>
-        prev.map((c) => (c.id === cardId ? { ...c, status: "error", message: e?.message ?? "Failed" } : c))
-      );
-    }
+    setTab("studio");
+    void generateNew(card.prompt, provider);
   }
 
   function download(url: string) {
@@ -161,89 +231,176 @@ export default function StudioPage() {
     document.body.removeChild(a);
   }
 
-  const emptyVisible = cards.length === 0;
+  async function deleteOne(card: OutputCard) {
+    if (!card.historyId) return;
+    setHistoryBusy(true);
+    try {
+      await fetch("/api/history", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: card.historyId }),
+      });
+      setCards((prev) => prev.filter((c) => c.historyId !== card.historyId));
+    } finally {
+      setHistoryBusy(false);
+    }
+  }
+
+  async function clearAll() {
+    setHistoryBusy(true);
+    try {
+      await fetch("/api/history", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      setCards([]);
+    } finally {
+      setHistoryBusy(false);
+    }
+  }
+
+  const emptyVisible = cards.length === 0 && tab === "studio";
 
   return (
     <>
-      <div id="empty-state" className="empty-state" style={{ display: emptyVisible ? "flex" : "none" }}>
-        <h1 className="first-message">Generate Your First Image</h1>
-        <div className="preset-prompts">
-          {[
-            "Sunset over ocean",
-            "Cute robot in forest",
-            "Futuristic city skyline",
-            "Dragon flying over mountains",
-          ].map((p) => (
-            <button
-              key={p}
-              type="button"
-              className="preset-btn"
-              data-prompt={p}
-              onClick={() => {
-                setPrompt(p);
-                void generateNew(p, provider);
-              }}
-            >
-              {p}
-            </button>
+      <div className="studio-tabs">
+        <button
+          type="button"
+          className={`tab-btn ${tab === "studio" ? "active" : ""}`}
+          onClick={() => setTab("studio")}
+        >
+          Studio
+        </button>
+        <button
+          type="button"
+          className={`tab-btn ${tab === "history" ? "active" : ""}`}
+          onClick={() => setTab("history")}
+        >
+          History
+        </button>
+
+        <div className="tabs-spacer" />
+
+        {tab === "history" ? (
+          <button type="button" className="tab-btn danger" onClick={() => void clearAll()} disabled={historyBusy}>
+            Clear all
+          </button>
+        ) : null}
+      </div>
+
+      {emptyVisible ? (
+        <div id="empty-state" className="empty-state">
+          <h1 className="first-message">Generate Your First Image</h1>
+          <div className="preset-prompts">
+            {["Sunset over ocean", "Cute robot in forest", "Futuristic city skyline", "Dragon flying over mountains"].map((p) => (
+              <button
+                key={p}
+                type="button"
+                className="preset-btn"
+                onClick={() => void generateNew(p, provider)}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      <div id="output" className="output" ref={outputRef}>
+        <div className="output-grid">
+          {tab === "history" && historyBusy ? (
+            <div className="history-loading">
+              <LoadingLoop />
+            </div>
+          ) : null}
+
+          {tab === "history" && cards.length === 0 ? (
+            <div className="history-empty">
+              <p className="loading">No history yet.</p>
+            </div>
+          ) : null}
+
+          {cards.map((c) => (
+            <div key={c.key} className="image-container" data-prompt={c.prompt}>
+              {c.status === "loading" ? (
+                <LoadingLoop />
+              ) : c.status === "error" ? (
+                <p className="loading">{c.message ?? "Failed to generate image"}</p>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={c.imageUrl} alt="Generated image" />
+              )}
+
+              {tab === "history" && c.status === "ready" ? (
+                <div className="prompt-chip" title={c.prompt}>
+                  {c.prompt}
+                </div>
+              ) : null}
+
+              <div className="image-controls">
+                <button
+                  type="button"
+                  className="image-remix-btn"
+                  aria-label="Remix image"
+                  onClick={() => remix(c.key)}
+                  disabled={c.status === "loading"}
+                >
+                  <RemixIcon />
+                </button>
+
+                <button
+                  type="button"
+                  className="image-download-btn"
+                  aria-label="Download image"
+                  onClick={() => c.imageUrl && download(c.imageUrl)}
+                  disabled={!c.imageUrl || c.status === "loading"}
+                >
+                  <DownloadIcon />
+                </button>
+
+                {tab === "history" ? (
+                  <button
+                    type="button"
+                    className="image-delete-btn"
+                    aria-label="Delete from history"
+                    onClick={() => void deleteOne(c)}
+                    disabled={historyBusy || !c.historyId}
+                  >
+                    <IconTrash />
+                  </button>
+                ) : null}
+              </div>
+            </div>
           ))}
         </div>
       </div>
 
-      <div id="output" className="output" ref={outputRef}>
-        {cards.map((c) => (
-          <div key={c.id} className="image-container" data-prompt={c.prompt}>
-            {c.status === "loading" ? (
-              <p className="loading">Generating...</p>
-            ) : c.status === "error" ? (
-              <p className="loading">{c.message ?? "Failed to generate image"}</p>
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={c.imageUrl} alt="Generated image" />
-            )}
-
-            <div className="image-controls">
-              <button
-                type="button"
-                className="image-remix-btn"
-                aria-label="Remix image"
-                onClick={() => void remix(c.id)}
-                disabled={c.status === "loading"}
-              >
-                <RemixIcon />
-              </button>
-              <button
-                type="button"
-                className="image-download-btn"
-                aria-label="Download image"
-                onClick={() => c.imageUrl && download(c.imageUrl)}
-                disabled={!c.imageUrl || c.status === "loading"}
-              >
-                <DownloadIcon />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
       <div id="style-menu" className={`style-menu ${styleOpen ? "open" : ""}`}>
-        {styles.map((s) => (
-          <button
-            key={s}
-            type="button"
-            className="style-pill"
-            data-style={s}
-            onClick={() => {
-              setPrompt((cur) => {
-                const t = cur.trim();
-                return t ? `${t}, ${s}` : s;
-              });
-              setStyleOpen(false);
-            }}
-          >
-            {s}
+        <div className="style-menu-header">
+          <div className="style-menu-title">Styles</div>
+          <button type="button" className="icon-button" aria-label="Close styles" onClick={() => setStyleOpen(false)}>
+            ✕
           </button>
-        ))}
+        </div>
+        <div className="style-menu-grid">
+          {styles.map((s) => (
+            <button
+              key={s}
+              type="button"
+              className="style-pill"
+              onClick={() => {
+                setPrompt((cur) => {
+                  const t = cur.trim();
+                  return t ? `${t}, ${s}` : s;
+                });
+                setStyleOpen(false);
+              }}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
       </div>
 
       <form
@@ -280,7 +437,6 @@ export default function StudioPage() {
           id="prompt-input"
           className="prompt-input"
           placeholder="Describe your image"
-          required
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           onFocus={() => setStyleOpen(false)}

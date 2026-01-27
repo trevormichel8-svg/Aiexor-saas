@@ -1,10 +1,17 @@
+import Link from "next/link";
 import { UserProfile } from "@clerk/nextjs";
-import { PageCard } from "../components/PageCard";
+import { PageCard } from "@/app/components/PageCard";
 
 export default function AccountPage() {
   return (
     <PageCard title="Account">
-      <div style={{ border: "1px solid rgba(0,255,238,.14)", borderRadius: 16, overflow: "hidden" }}>
+      <div className="page-actions">
+        <Link className="pill-link" href="/studio">
+          Back to Studio
+        </Link>
+      </div>
+
+      <div className="themed-panel">
         <UserProfile />
       </div>
     </PageCard>

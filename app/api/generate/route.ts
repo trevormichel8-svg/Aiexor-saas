@@ -69,10 +69,20 @@ export async function POST(req: Request) {
       },
     });
 
+    const generation = await prisma.generation.create({
+      data: {
+        userId: credit.user.id,
+        prompt,
+        provider,
+        image: images[0]!,
+      },
+    });
+
     return NextResponse.json({
       images,
       image: images[0],
       remainingCredits: Math.max(0, credit.user.credits),
+      generationId: generation.id,
     });
   } catch (e: any) {
     // Refund the credit for failed generations.
