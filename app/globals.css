@@ -1071,3 +1071,24 @@ body {
   overflow: hidden;
   box-shadow: 0 0 18px rgba(0,255,238,0.12);
 }
+/* Mobile header wrap fix */
+.app-shell__header {
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+.app-shell__header-right {
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+.pill {
+  max-width: 100%;
+}
+
+.pill__label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
