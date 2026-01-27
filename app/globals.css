@@ -775,3 +775,39 @@ body {
   object-fit: cover;
   display:block;
 }
+
+
+/* --- Studio-style wrappers for non-Studio pages --- */
+.page-card-inner {
+  padding: 1rem;
+}
+
+.page-card-title {
+  margin: 0 0 0.75rem 0;
+  color: var(--teal);
+  text-shadow: 0 0 8px var(--rainbow-shadow);
+  font-size: 1.05rem;
+}
+
+.page-card-body {
+  display: grid;
+  gap: 0.75rem;
+}
+
+/* Top-right credits pill */
+.credits-pill {
+  background-color: var(--surface-color);
+  border-radius: var(--radius-pill);
+  padding: 0.45rem 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--teal);
+  box-shadow: 0 0 6px var(--rainbow-shadow);
+  text-decoration: none;
+}
+
+.credits-pill svg {
+  width: 18px;
+  height: 18px;
+}

@@ -2,16 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { SignedIn, SignedOut, SignInButton, useClerk } from "@clerk/nextjs";
 import { UserMenuButton } from "./UserMenuButton";
+import { CreditsPill } from "./CreditsPill";
 
 type NavItem = { href: string; label: string; icon: "sparkles" | "card" | "user" };
 
 function IconSparkles() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M12 2l1.5 5L19 9l-5.5 2L12 16l-1.5-5L5 9l5.5-2L12 2z" />
       <path d="M4 14l.8 2.6L7.4 18l-2.6.8L4 21l-.8-2.2L1 18l2.2-.8L4 14z" />
     </svg>
@@ -19,7 +20,7 @@ function IconSparkles() {
 }
 function IconCreditCard() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <rect x="2" y="5" width="20" height="14" rx="2" />
       <path d="M2 10h20" />
     </svg>
@@ -27,7 +28,7 @@ function IconCreditCard() {
 }
 function IconUser() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <circle cx="12" cy="7" r="4" />
       <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
     </svg>
@@ -35,7 +36,7 @@ function IconUser() {
 }
 function IconEllipsis() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <circle cx="12" cy="12" r="1" />
       <circle cx="19" cy="12" r="1" />
       <circle cx="5" cy="12" r="1" />
@@ -44,12 +45,20 @@ function IconEllipsis() {
 }
 function IconLogOut() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
       <polyline points="16 17 21 12 16 7" />
       <line x1="21" y1="12" x2="9" y2="12" />
     </svg>
   );
+}
+
+function pageName(pathname: string) {
+  if (pathname === "/") return "Home";
+  if (pathname.startsWith("/studio")) return "Studio";
+  if (pathname.startsWith("/billing")) return "Billing";
+  if (pathname.startsWith("/account")) return "Account";
+  return "Aiexor";
 }
 
 function NavIcon({ icon }: { icon: NavItem["icon"] }) {
@@ -62,6 +71,11 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const clerk = useClerk();
+  const title = pageName(pathname);
+
+  useEffect(() => {
+    document.title = `Aiexor • ${title}`;
+  }, [title]);
 
   const items: NavItem[] = useMemo(
     () => [
@@ -85,7 +99,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
             <span />
             <span />
           </button>
-          <div className="app-label">Aiexor</div>
+          <div className="app-label">{title}</div>
         </div>
 
         <div className="top-right">
@@ -101,6 +115,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
           </SignedOut>
 
           <SignedIn>
+            <CreditsPill />
             <UserMenuButton />
             <button className="icon-button" aria-label="Secondary action" type="button">
               <IconEllipsis />

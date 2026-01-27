@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PageCard } from "../components/PageCard";
 
 export default function BillingPage() {
   const [loading, setLoading] = useState(false);
@@ -12,8 +13,8 @@ export default function BillingPage() {
     try {
       const res = await fetch("/api/billing/checkout", { method: "POST" });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json?.error ?? `Request failed: ${res.status}`);
-      window.location.href = json.url;
+      if (!res.ok) throw new Error((json as any)?.error ?? `Request failed: ${res.status}`);
+      window.location.href = (json as any).url;
     } catch (e: any) {
       setError(e?.message ?? "Something went wrong");
       setLoading(false);
@@ -21,20 +22,16 @@ export default function BillingPage() {
   }
 
   return (
-    <main>
-      <h2>Billing</h2>
-      <p style={{ opacity: 0.8 }}>
-        This creates a Stripe Checkout subscription. Webhook refills credits on invoice paid.
+    <PageCard title="Billing">
+      <p style={{ opacity: 0.85, marginTop: 0 }}>
+        Subscribe to refill credits automatically.
       </p>
 
-      <button onClick={onSubscribe} disabled={loading}>
-        {loading ? "Redirecting..." : "Subscribe"}
+      <button className="preset-btn" onClick={onSubscribe} disabled={loading} type="button">
+        {loading ? "Redirecting…" : "Subscribe"}
       </button>
 
-      {error && <p style={{ color: "crimson" }}>{error}</p>}
-      <p style={{ marginTop: 12 }}>
-        <a href="/studio">Back to Studio</a>
-      </p>
-    </main>
+      {error && <p style={{ color: "crimson", marginTop: 10 }}>{error}</p>}
+    </PageCard>
   );
 }
