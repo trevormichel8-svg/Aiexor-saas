@@ -1,4 +1,4 @@
-name: Prisma DB Push (Init)
+name: Prisma DB Push
 
 on:
   workflow_dispatch:
@@ -7,30 +7,19 @@ jobs:
   db_push:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: "20"
 
       - name: Install deps
         run: npm ci
 
-      - name: Debug DATABASE_URL prefix (safe)
-        run: |
-          node -e "const u=process.env.DATABASE_URL||''; console.log('Has postgresql://', u.startsWith('postgresql://')); console.log('Prefix:', u.slice(0, 12));"
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
       - name: Prisma generate
         run: npx prisma generate
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-      - name: Prisma db push (create/update tables)
-        run: npx prisma db push --accept-data-loss
+      - name: Prisma db push
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npx prisma db push
