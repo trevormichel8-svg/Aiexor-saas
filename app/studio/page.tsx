@@ -100,7 +100,8 @@ export default function StudioPage() {
       "Watercolor","Oil Painting","Acrylic","Ink Drawing","Charcoal","Pastel","Geometric","Kawaii","Retro",
       "Vintage","Psychedelic","Horror","Stencil","Indigenous","Coloring Book","Comic","Photo Realistic","Highly Detailed",
       "Silhouette","Mosaic","Realistic Anime","Vibrant","Epic Origami","Abstract Curves","CGI","Black&White","3D Shading",
-      "Quilling","Candy"
+      "Quilling","Candy","Double Exposure","Kintsugi","Glass","Movie Poster","Filigree","Fractal","Holographic","Golder Ratio",
+      "Iridescent","Topography","Silver Nitrate","Embossed","Embroidery"
     ],
     []
   );
