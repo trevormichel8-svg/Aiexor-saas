@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { aspectToOpenAISize, aspectToVertexRatio, type AspectPreset, type OpenAIQuality } from "@/lib/generation_settings";
 
 type Provider = "openai" | "vertex";
 type Tab = "studio" | "history";
@@ -109,6 +110,9 @@ export default function StudioPage() {
   const [tab, setTab] = useState<Tab>("studio");
   const [prompt, setPrompt] = useState("");
   const [provider, setProvider] = useState<Provider>("openai");
+  const [aspect, setAspect] = useState<AspectPreset>("square");
+  const [openaiQuality, setOpenaiQuality] = useState<OpenAIQuality>("auto");
+  const [vertexSamples, setVertexSamples] = useState(1);
   const [styleOpen, setStyleOpen] = useState(false);
   const [cards, setCards] = useState<OutputCard[]>([]);
   const [busy, setBusy] = useState(false);
@@ -150,6 +154,30 @@ export default function StudioPage() {
     void fetchHistory();
   }, []);
 
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("aiexor.studio.settings.v1");
+      if (!raw) return;
+      const s = JSON.parse(raw) as any;
+      if (s?.aspect) setAspect(s.aspect);
+      if (s?.openaiQuality) setOpenaiQuality(s.openaiQuality);
+      if (typeof s?.vertexSamples === "number") setVertexSamples(s.vertexSamples);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "aiexor.studio.settings.v1",
+        JSON.stringify({ aspect, openaiQuality, vertexSamples })
+      );
+    } catch {
+      // ignore
+    }
+  }, [aspect, openaiQuality, vertexSamples]);
+
   async function callGenerate(p: string, prov: Provider) {
     const res = await fetch("/api/generate", {
       method: "POST",
@@ -157,8 +185,10 @@ export default function StudioPage() {
       body: JSON.stringify({
         prompt: p,
         provider: prov,
-        aspectRatio: "1:1",
-        sampleCount: 1,
+        openaiSize: aspectToOpenAISize(aspect),
+        openaiQuality,
+        aspectRatio: aspectToVertexRatio(aspect),
+        sampleCount: vertexSamples,
         personGeneration: "allow_none",
       }),
     });
@@ -433,6 +463,46 @@ export default function StudioPage() {
           <option value="openai">OpenAI</option>
           <option value="vertex">Vertex AI</option>
         </select>
+
+        <select
+          id="aspect-select"
+          className="provider-select"
+          aria-label="Aspect ratio"
+          value={aspect}
+          onChange={(e) => setAspect(e.target.value as AspectPreset)}
+        >
+          <option value="square">Square</option>
+          <option value="landscape">Landscape</option>
+          <option value="portrait">Portrait</option>
+        </select>
+
+        {provider === "openai" ? (
+          <select
+            id="quality-select"
+            className="provider-select"
+            aria-label="Quality"
+            value={openaiQuality}
+            onChange={(e) => setOpenaiQuality(e.target.value as OpenAIQuality)}
+          >
+            <option value="auto">Quality: Auto</option>
+            <option value="high">Quality: High</option>
+            <option value="medium">Quality: Medium</option>
+            <option value="low">Quality: Low</option>
+          </select>
+        ) : (
+          <select
+            id="samples-select"
+            className="provider-select"
+            aria-label="Samples"
+            value={vertexSamples}
+            onChange={(e) => setVertexSamples(Number(e.target.value))}
+          >
+            <option value={1}>Samples: 1</option>
+            <option value={2}>Samples: 2</option>
+            <option value={3}>Samples: 3</option>
+            <option value={4}>Samples: 4</option>
+          </select>
+        )}
 
         <textarea
           id="prompt-input"

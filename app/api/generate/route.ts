@@ -10,6 +10,8 @@ import { generateVertexImagesBase64 } from "@/lib/vertex_images";
 const Body = z.object({
   prompt: z.string().trim().min(1).max(1000),
   provider: z.enum(["openai", "vertex"]).optional().default("openai"),
+  openaiSize: z.enum(["1024x1024", "1536x1024", "1024x1536", "auto"]).optional(),
+  openaiQuality: z.enum(["auto", "high", "medium", "low"]).optional(),
 
   // Vertex-only (ignored by OpenAI for now)
   sampleCount: z.number().int().min(1).max(4).optional(),
@@ -60,7 +62,7 @@ export async function POST(req: Request) {
             negativePrompt: parsed.data.negativePrompt,
             personGeneration: parsed.data.personGeneration,
           })
-        : [await generateImageBase64(prompt)];
+        : [await generateImageBase64(prompt, { size: parsed.data.openaiSize, quality: parsed.data.openaiQuality })];
 
     await prisma.usageLog.create({
       data: {
@@ -73,7 +75,7 @@ export async function POST(req: Request) {
       data: {
         userId: credit.user.id,
         prompt,
-        provider,
+        provider: `${provider}${parsed.data.openaiSize ? `:${parsed.data.openaiSize}` : ""}${parsed.data.openaiQuality ? `:${parsed.data.openaiQuality}` : ""}`,
         image: images[0]!,
       },
     });
