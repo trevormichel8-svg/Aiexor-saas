@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function GlobalError({
   error,
@@ -9,94 +9,73 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    // Logs will appear in Vercel logs + browser console
-    console.error("App error:", error);
+  const [copied, setCopied] = useState(false);
+
+  const message = useMemo(() => {
+    const lines = [
+      error?.message ?? "Unknown error",
+      error?.digest ? `digest: ${error.digest}` : "",
+      error?.stack ?? "",
+    ].filter(Boolean);
+    return lines.join("\n");
   }, [error]);
 
-  const message =
-    typeof error?.message === "string" && error.message.length > 0
-      ? error.message
-      : "Unknown client-side error";
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.error(error);
+  }, [error]);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(message);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch {
+      // ignore
+    }
+  };
 
   return (
-    <main className="min-h-dvh flex items-center justify-center p-6 bg-black">
-      <div className="w-full max-w-xl rounded-3xl border border-white/10 bg-black/50 p-6 shadow-[0_0_50px_rgba(0,255,200,0.18)] backdrop-blur">
-        <div className="flex items-center justify-between gap-3">
+    <div className="min-h-dvh bg-black text-white flex items-center justify-center p-4">
+      <div className="w-full max-w-xl rounded-3xl border border-emerald-500/30 bg-emerald-950/10 p-5 shadow-[0_0_55px_rgba(16,185,129,0.25)]">
+        <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="text-sm text-white/70">Aiexor</div>
-            <h1 className="mt-1 text-2xl font-semibold text-white">
-              Something went wrong
+            <div className="text-xs text-emerald-200/70">Aiexor</div>
+            <h1 className="mt-2 text-3xl font-semibold leading-tight">
+              Application crashed
             </h1>
+            <p className="mt-2 text-sm text-white/70">
+              This is the real error message. Copy it and send it to me.
+            </p>
           </div>
 
           <button
             onClick={() => reset()}
-            className="shrink-0 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-white shadow-[0_0_18px_rgba(0,255,200,0.18)]"
+            className="shrink-0 rounded-2xl border border-emerald-500/40 bg-emerald-950/20 px-4 py-3 text-sm font-medium shadow-[0_0_30px_rgba(16,185,129,0.25)] active:scale-[0.98]"
           >
             Try again
           </button>
         </div>
 
-        <p className="mt-3 text-white/70">
-          This is the real error your app hit. Copy it and send it to me.
-        </p>
-
         <div className="mt-4 rounded-2xl border border-white/10 bg-black/40 p-4">
-          <div className="text-xs uppercase tracking-wide text-white/50">
-            Error message
-          </div>
-          <pre className="mt-2 whitespace-pre-wrap break-words text-sm text-white">
+          <div className="text-xs text-white/60">Error message</div>
+          <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap break-words text-xs leading-relaxed">
             {message}
           </pre>
-
-          {error?.digest ? (
-            <>
-              <div className="mt-4 text-xs uppercase tracking-wide text-white/50">
-                Digest
-              </div>
-              <pre className="mt-2 whitespace-pre-wrap break-words text-sm text-white">
-                {error.digest}
-              </pre>
-            </>
-          ) : null}
-
-          {error?.stack ? (
-            <>
-              <div className="mt-4 text-xs uppercase tracking-wide text-white/50">
-                Stack
-              </div>
-              <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words text-xs text-white/80">
-                {error.stack}
-              </pre>
-            </>
-          ) : null}
         </div>
 
-        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-4 flex items-center justify-between gap-3">
           <button
-            onClick={() => {
-              try {
-                const text = [
-                  `Message: ${message}`,
-                  error?.digest ? `Digest: ${error.digest}` : "",
-                  error?.stack ? `Stack:\n${error.stack}` : "",
-                ]
-                  .filter(Boolean)
-                  .join("\n\n");
-                navigator.clipboard?.writeText(text);
-              } catch {}
-            }}
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-white/90"
+            onClick={copy}
+            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm active:scale-[0.98]"
           >
-            Copy error
+            {copied ? "Copied" : "Copy error"}
           </button>
-
-          <span className="text-xs text-white/50">
-            If Copy doesn’t work on your phone, screenshot this page.
-          </span>
+          <div className="text-xs text-white/40">
+            If this keeps happening, reload the page.
+          </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
