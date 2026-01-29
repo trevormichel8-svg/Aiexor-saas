@@ -12,3 +12,5 @@ export function PageCard({ title, children }: { title: string; children: ReactNo
     </div>
   );
 }
+
+export default PageCard;
