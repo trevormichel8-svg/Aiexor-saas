@@ -1,15 +1,6 @@
 import { env } from "./env";
 import { z } from "zod";
 
-export type OpenAIImageOptions = {
-  /** For GPT Image models: 1024x1024, 1536x1024 (landscape), 1024x1536 (portrait), or auto. */
-  size?: "1024x1024" | "1536x1024" | "1024x1536" | "auto";
-  /** For GPT Image models: auto | high | medium | low */
-  quality?: "auto" | "high" | "medium" | "low";
-  /** Output format for GPT Image models. */
-  output_format?: "png" | "jpeg" | "webp";
-};
-
 const OpenAIImagesResponse = z.object({
   data: z.array(
     z.object({
@@ -56,31 +47,20 @@ async function requestOpenAI(body: Record<string, unknown>) {
 
 /**
  * Generate an image and return a data URL (base64).
- *
- * Note: `response_format` is not supported for GPT Image models (they always return base64),
- * but we keep a small compatibility retry for older DALL·E flows.
+ * This is compatible with both older endpoints that accept `response_format`
+ * and newer ones that reject it (we retry without).
  */
-export async function generateImageBase64(prompt: string, opts: OpenAIImageOptions = {}): Promise<string> {
-  const model = env.OPENAI_IMAGE_MODEL;
-
+export async function generateImageBase64(prompt: string): Promise<string> {
   const baseBody: Record<string, unknown> = {
-    model,
+    model: env.OPENAI_IMAGE_MODEL,
     prompt,
-    size: opts.size ?? "1024x1024",
-    quality: opts.quality ?? "auto",
-    output_format: opts.output_format ?? "png",
+    size: "1024x1024",
   };
 
-  const isGptImage = String(model).startsWith("gpt-image");
-
   try {
-    const json = isGptImage
-      ? await requestOpenAI(baseBody)
-      : await requestOpenAI({ ...baseBody, response_format: "b64_json" });
-
+    const json = await requestOpenAI({ ...baseBody, response_format: "b64_json" });
     const b64 = json.data[0]?.b64_json;
     if (b64) return `data:image/png;base64,${b64}`;
-
     const url = json.data[0]?.url;
     if (url) {
       const imgRes = await fetch(url);
@@ -88,19 +68,15 @@ export async function generateImageBase64(prompt: string, opts: OpenAIImageOptio
       const buf = await imgRes.arrayBuffer();
       return `data:${ct};base64,${arrayBufferToBase64(buf)}`;
     }
-
     throw new Error("OpenAI returned no image data");
   } catch (e: any) {
-    // Compatibility fallback: if response_format is rejected, retry without.
     const msg = String(e?.message ?? "").toLowerCase();
-    const isResponseFormatIssue =
-      e?.param === "response_format" || (msg.includes("unknown parameter") && msg.includes("response_format"));
+    const isResponseFormatIssue = e?.param === "response_format" || (msg.includes("unknown parameter") && msg.includes("response_format"));
     if (!isResponseFormatIssue) throw e;
 
     const json = await requestOpenAI(baseBody);
     const b64 = json.data[0]?.b64_json;
     if (b64) return `data:image/png;base64,${b64}`;
-
     const url = json.data[0]?.url;
     if (url) {
       const imgRes = await fetch(url);
@@ -108,7 +84,6 @@ export async function generateImageBase64(prompt: string, opts: OpenAIImageOptio
       const buf = await imgRes.arrayBuffer();
       return `data:${ct};base64,${arrayBufferToBase64(buf)}`;
     }
-
     throw new Error("OpenAI returned no image data");
   }
 }
