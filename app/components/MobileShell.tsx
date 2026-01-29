@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import CreditsPill from "./CreditsPill";
 import UserMenuButton from "./UserMenuButton";
 
@@ -17,17 +17,11 @@ export default function MobileShell({ children }: { children: React.ReactNode })
 
   const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const nav: NavItem[] = useMemo(
-    () => [
-      { href: "/studio", label: "Studio", icon: "studio" },
-      { href: "/history", label: "History", icon: "history" },
-    ],
-    []
-  );
-
-  const isActive = (href: string) => pathname === href;
+  const nav: NavItem[] = [
+    { href: "/studio", label: "Studio", icon: "studio" },
+    { href: "/history", label: "History", icon: "history" },
+  ];
+const isActive = (href: string) => pathname === href;
 
   // Close menus on outside click
   useEffect(() => {

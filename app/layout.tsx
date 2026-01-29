@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <html lang="en">
         <body>
           <Suspense fallback={<div className="min-h-dvh" />}>
-  <MobileShell>{children}</MobileShell>
+  <Suspense fallback={null}><MobileShell>{children}</MobileShell></Suspense>
 </Suspense>
         </body>
       </html>
