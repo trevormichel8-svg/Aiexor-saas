@@ -109,6 +109,7 @@ export default function StudioPage() {
   const [tab, setTab] = useState<Tab>("studio");
   const [prompt, setPrompt] = useState("");
   const [provider, setProvider] = useState<Provider>("openai");
+  const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [styleOpen, setStyleOpen] = useState(false);
   const [cards, setCards] = useState<OutputCard[]>([]);
   const [busy, setBusy] = useState(false);
@@ -149,6 +150,30 @@ export default function StudioPage() {
   useEffect(() => {
     void fetchHistory();
   }, []);
+
+
+useEffect(() => {
+  if (typeof window === "undefined") return;
+
+  const applyParams = () => {
+    const sp = new URLSearchParams(window.location.search);
+    const v = sp.get("view");
+    setTab(v === "history" ? "history" : "studio");
+
+    const p = sp.get("provider");
+    if (p === "openai" || p === "vertex") setProvider(p);
+  };
+
+  applyParams();
+
+  window.addEventListener("aiexor:params", applyParams);
+  window.addEventListener("popstate", applyParams);
+  return () => {
+    window.removeEventListener("aiexor:params", applyParams);
+    window.removeEventListener("popstate", applyParams);
+  };
+}, []);
+
 
   async function callGenerate(p: string, prov: Provider) {
     const res = await fetch("/api/generate", {
@@ -265,30 +290,6 @@ export default function StudioPage() {
 
   return (
     <>
-      <div className="studio-tabs">
-        <button
-          type="button"
-          className={`tab-btn ${tab === "studio" ? "active" : ""}`}
-          onClick={() => setTab("studio")}
-        >
-          Studio
-        </button>
-        <button
-          type="button"
-          className={`tab-btn ${tab === "history" ? "active" : ""}`}
-          onClick={() => setTab("history")}
-        >
-          History
-        </button>
-
-        <div className="tabs-spacer" />
-
-        {tab === "history" ? (
-          <button type="button" className="tab-btn danger" onClick={() => void clearAll()} disabled={historyBusy}>
-            Clear all
-          </button>
-        ) : null}
-      </div>
 
       {emptyVisible ? (
         <div id="empty-state" className="empty-state">
@@ -348,6 +349,16 @@ export default function StudioPage() {
                   disabled={c.status === "loading"}
                 >
                   <RemixIcon />
+                </button>
+
+                <button
+                  type=\"button\"
+                  className={`image-like-btn ${liked[c.key] ? \"active\" : \"\"}`}
+                  aria-label=\"Like image\"
+                  onClick={() => setLiked((cur) => ({ ...cur, [c.key]: !cur[c.key] }))}
+                  disabled={c.status === \"loading\"}
+                >
+                  <LikeIcon filled={!!liked[c.key]} />
                 </button>
 
                 <button
@@ -422,17 +433,6 @@ export default function StudioPage() {
         >
           <BrushIcon />
         </button>
-
-        <select
-          id="provider-select"
-          className="provider-select"
-          aria-label="Image model provider"
-          value={provider}
-          onChange={(e) => setProvider(e.target.value as Provider)}
-        >
-          <option value="openai">OpenAI</option>
-          <option value="vertex">Vertex AI</option>
-        </select>
 
         <textarea
           id="prompt-input"

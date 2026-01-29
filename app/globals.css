@@ -260,6 +260,8 @@ body {
   margin-top: auto;
   display: flex;
   align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
   padding: 0.5rem 0.75rem;
   background-color: var(--surface-color);
   /* Remove the teal divider line and rely on subtle shadow for separation */
@@ -284,7 +286,8 @@ body {
   color: var(--teal);
   box-shadow: 0 0 6px var(--rainbow-shadow);
   cursor: pointer;
-  margin-right: 0.5rem;
+  margin-right: 0;
+  min-width: 0;
   transition: background-color 0.2s;
 }
 .prompt-bar .plus-btn:hover {
@@ -513,16 +516,17 @@ body {
    near the bottom right of the card and allow remixing or downloading
    the individual image. */
 .image-controls {
-  position: absolute;
-  bottom: 0.5rem;
-  right: 0.5rem;
+  position: static;
   display: flex;
+  flex-wrap: wrap;
   gap: 0.4rem;
-  z-index: 2;
+  justify-content: flex-end;
+  margin-top: 0.55rem;
 }
 
 /* Base styles for the per-image action buttons */
 .image-remix-btn,
+.image-like-btn,
 .image-download-btn {
   background-color: var(--surface-color);
   border: none;
@@ -1091,4 +1095,53 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+
+@media (max-width: 520px) {
+  .prompt-input {
+    flex: 1 1 100%;
+  }
+}
+
+
+.hamburger.icon-button {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-like-btn.active {
+  background: rgba(0,255,238,0.14);
+  box-shadow: 0 0 16px rgba(0,255,238,0.22);
+}
+
+.sidebar-section {
+  margin-top: 0.75rem;
+}
+
+.sidebar-label {
+  display: block;
+  font-size: 0.85rem;
+  opacity: 0.85;
+  margin-bottom: 0.35rem;
+}
+
+.sidebar-select {
+  width: 100%;
+  background: var(--bg-color);
+  border: 1px solid rgba(0,255,238,0.18);
+  color: var(--text-color);
+  border-radius: 12px;
+  padding: 0.6rem 0.75rem;
+  box-shadow: 0 0 10px rgba(0,255,238,0.10);
+  outline: none;
+}
+
+.sidebar-muted {
+  opacity: 0.8;
 }

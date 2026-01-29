@@ -1,54 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { SignedIn, SignedOut, SignInButton, useClerk } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { UserMenuButton } from "./UserMenuButton";
 import { CreditsPill } from "./CreditsPill";
 
-type NavItem = { href: string; label: string; icon: "sparkles" | "card" | "user" };
 
-function IconSparkles() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 2l1.5 5L19 9l-5.5 2L12 16l-1.5-5L5 9l5.5-2L12 2z" />
-      <path d="M4 14l.8 2.6L7.4 18l-2.6.8L4 21l-.8-2.2L1 18l2.2-.8L4 14z" />
-    </svg>
-  );
-}
-function IconCreditCard() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="2" y="5" width="20" height="14" rx="2" />
-      <path d="M2 10h20" />
-    </svg>
-  );
-}
 function IconUser() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <circle cx="12" cy="7" r="4" />
       <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
-    </svg>
-  );
-}
-function IconEllipsis() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="1" />
-      <circle cx="19" cy="12" r="1" />
-      <circle cx="5" cy="12" r="1" />
-    </svg>
-  );
-}
-function IconLogOut() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line x1="21" y1="12" x2="9" y2="12" />
     </svg>
   );
 }
@@ -62,11 +26,6 @@ function IconMenu() {
   );
 }
 
-function NavIcon({ icon }: { icon: NavItem["icon"] }) {
-  if (icon === "card") return <IconCreditCard />;
-  if (icon === "user") return <IconUser />;
-  return <IconSparkles />;
-}
 
 function pageLabel(pathname: string) {
   if (pathname.startsWith("/studio")) return "Studio";
@@ -78,44 +37,35 @@ function pageLabel(pathname: string) {
 export function MobileShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const clerk = useClerk();
 
-  const [moreOpen, setMoreOpen] = useState(false);
-  const moreRef = useRef<HTMLDivElement | null>(null);
+const [sidebarProvider, setSidebarProvider] = useState<"openai" | "vertex">("openai");
+const [sidebarView, setSidebarView] = useState<"studio" | "history">("studio");
 
-  const items: NavItem[] = useMemo(
-    () => [
-      { href: "/studio", label: "Studio", icon: "sparkles" },
-      { href: "/billing", label: "Billing", icon: "card" },
-      { href: "/account", label: "Account", icon: "user" },
-    ],
-    []
-  );
+useEffect(() => {
+  if (typeof window === "undefined") return;
+  const sp = new URLSearchParams(window.location.search);
+  const p = sp.get("provider");
+  if (p === "openai" || p === "vertex") setSidebarProvider(p);
+  const v = sp.get("view");
+  setSidebarView(v === "history" ? "history" : "studio");
+}, [open, pathname]);
+
+const updateParam = (key: string, value?: string) => {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  if (!value) url.searchParams.delete(key);
+  else url.searchParams.set(key, value);
+  window.history.replaceState({}, "", url.toString());
+  window.dispatchEvent(new Event("aiexor:params"));
+};
 
   useEffect(() => {
     setOpen(false);
-    setMoreOpen(false);
   }, [pathname]);
 
   useEffect(() => {
     document.title = `Aiexor • ${pageLabel(pathname)}`;
   }, [pathname]);
-
-  useEffect(() => {
-    function onDocClick(e: MouseEvent) {
-      if (!moreOpen) return;
-      const t = e.target as Node | null;
-      if (!t) return;
-      if (moreRef.current?.contains(t)) return;
-      setMoreOpen(false);
-    }
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, [moreOpen]);
-
-  function isActive(href: string) {
-    return pathname === href;
-  }
 
   return (
     <div className="mobile-frame">
@@ -143,37 +93,6 @@ export function MobileShell({ children }: { children: ReactNode }) {
           <SignedIn>
             <UserMenuButton />
           </SignedIn>
-
-          <div className="more-menu" ref={moreRef}>
-            <button className="icon-button" aria-label="More" type="button" onClick={() => setMoreOpen((v) => !v)}>
-              <IconEllipsis />
-            </button>
-
-            {moreOpen ? (
-              <div className="more-pop" role="menu" aria-label="More menu">
-                {items.map((it) => (
-                  <Link key={it.href} className="more-item" href={it.href} onClick={() => setMoreOpen(false)}>
-                    <NavIcon icon={it.icon} />
-                    <span>{it.label}</span>
-                  </Link>
-                ))}
-
-                <SignedIn>
-                  <button
-                    className="more-item"
-                    type="button"
-                    onClick={() => {
-                      setMoreOpen(false);
-                      clerk.signOut({ redirectUrl: "/" });
-                    }}
-                  >
-                    <IconLogOut />
-                    <span>Sign out</span>
-                  </button>
-                </SignedIn>
-              </div>
-            ) : null}
-          </div>
         </div>
       </div>
 
@@ -191,33 +110,51 @@ export function MobileShell({ children }: { children: ReactNode }) {
         </button>
 
         <div className="sidebar-content">
-          <h2>Menu</h2>
-          <nav className="sidebar-nav">
-            {items.map((it) => (
-              <Link
-                key={it.href}
-                href={it.href}
-                className={`sidebar-link ${isActive(it.href) ? "active" : ""}`}
-                onClick={() => setOpen(false)}
-              >
-                <NavIcon icon={it.icon} />
-                <span>{it.label}</span>
-              </Link>
-            ))}
-          </nav>
+          <h2>Controls</h2>
 
-          <SignedIn>
-            <div style={{ marginTop: "1rem" }}>
-              <button
-                type="button"
-                className="sidebar-link"
-                onClick={() => clerk.signOut({ redirectUrl: "/" })}
+          {pathname.startsWith("/studio") ? (
+            <div className="sidebar-section">
+              <label className="sidebar-label" htmlFor="sidebar-view">
+                View
+              </label>
+              <select
+                id="sidebar-view"
+                className="sidebar-select"
+                value={sidebarView}
+                onChange={(e) => {
+                  const v = e.target.value === "history" ? "history" : "studio";
+                  setSidebarView(v);
+                  updateParam("view", v === "studio" ? undefined : "history");
+                  setOpen(false);
+                }}
               >
-                <IconLogOut />
-                <span>Sign out</span>
-              </button>
+                <option value="studio">Studio</option>
+                <option value="history">History</option>
+              </select>
+
+              <label className="sidebar-label" htmlFor="sidebar-provider" style={{ marginTop: "0.75rem" }}>
+                Model
+              </label>
+              <select
+                id="sidebar-provider"
+                className="sidebar-select"
+                value={sidebarProvider}
+                onChange={(e) => {
+                  const v = e.target.value === "vertex" ? "vertex" : "openai";
+                  setSidebarProvider(v);
+                  updateParam("provider", v);
+                  setOpen(false);
+                }}
+              >
+                <option value="openai">OpenAI</option>
+                <option value="vertex">Vertex AI</option>
+              </select>
             </div>
-          </SignedIn>
+          ) : (
+            <div className="sidebar-section">
+              <div className="sidebar-muted">Open Studio to see controls.</div>
+            </div>
+          )}
         </div>
       </div>
     </div>
