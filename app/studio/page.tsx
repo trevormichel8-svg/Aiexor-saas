@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import PageCard from "../components/PageCard";
+import { PageCard } from "../components/PageCard";
 
 type Provider = "openai" | "vertex";
 type GenImage = { url: string };

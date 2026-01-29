@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import PageCard from "../components/PageCard";
+import { PageCard } from "../components/PageCard";
 
 type HistoryItem = {
   id: string;

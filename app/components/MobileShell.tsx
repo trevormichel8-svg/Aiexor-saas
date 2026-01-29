@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
-import CreditsPill from "./CreditsPill";
-import UserMenuButton from "./UserMenuButton";
+import { CreditsPill } from "./CreditsPill";
+import { UserMenuButton } from "./UserMenuButton";
 
 type NavItem = { href: string; label: string; icon: "studio" | "history" };
 
@@ -17,11 +17,35 @@ export default function MobileShell({ children }: { children: React.ReactNode })
 
   const pathname = usePathname();
   const router = useRouter();
-  const nav: NavItem[] = [
-    { href: "/studio", label: "Studio", icon: "studio" },
-    { href: "/history", label: "History", icon: "history" },
-  ];
-const isActive = (href: string) => pathname === href;
+
+  const [queryString, setQueryString] = useState<string>("");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sync = () => setQueryString(window.location.search || "");
+    sync();
+    window.addEventListener("popstate", sync);
+    window.addEventListener("aiexor:params", sync as any);
+    return () => {
+      window.removeEventListener("popstate", sync);
+      window.removeEventListener("aiexor:params", sync as any);
+    };
+  }, [pathname]);
+
+  const params = useMemo(() => {
+    const qs = queryString.startsWith("?") ? queryString.slice(1) : queryString;
+    return new URLSearchParams(qs);
+  }, [queryString]);
+
+  const nav: NavItem[] = useMemo(
+    () => [
+      { href: "/studio", label: "Studio", icon: "studio" },
+      { href: "/history", label: "History", icon: "history" },
+    ],
+    []
+  );
+
+  const isActive = (href: string) => pathname === href;
 
   // Close menus on outside click
   useEffect(() => {
@@ -46,18 +70,22 @@ const isActive = (href: string) => pathname === href;
   }, []);
 
   const updateParam = (key: string, value?: string) => {
-    const sp = new URLSearchParams(searchParams?.toString());
-    if (!value) sp.delete(key);
-    else sp.set(key, value);
-    const qs = sp.toString();
-    router.replace(`${pathname}${qs ? `?${qs}` : ""}`);
-  };
+  if (typeof window === "undefined") return;
+  const sp = new URLSearchParams(window.location.search);
+  if (!value) sp.delete(key);
+  else sp.set(key, value);
+  const qs = sp.toString();
+  const next = qs ? `${pathname}?${qs}` : pathname;
+  router.replace(next);
+  setQueryString(qs ? `?${qs}` : "");
+  window.dispatchEvent(new Event("aiexor:params"));
+};
 
-  const provider = searchParams?.get("provider") ?? "openai";
-  const aspect = searchParams?.get("ar") ?? "1:1";
-  const negative = searchParams?.get("neg") ?? "";
-  const people = searchParams?.get("people") ?? "allow_adult";
-  const samples = searchParams?.get("samples") ?? "1";
+  const provider = params.get("provider") ?? "openai";
+  const aspect = params.get("ar") ?? "1:1";
+  const negative = params.get("neg") ?? "";
+  const people = params.get("people") ?? "allow_adult";
+  const samples = params.get("samples") ?? "1";
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
 
