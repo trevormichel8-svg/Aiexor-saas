@@ -96,9 +96,7 @@ export default function MobileShell({ children }: { children: React.ReactNode })
 
   const nativeShare = async () => {
     try {
-      // @ts-expect-error - navigator.share exists on mobile
       if (navigator.share) {
-        // @ts-expect-error - navigator.share exists on mobile
         await navigator.share({ url: shareUrl, title: "Aiexor" });
         setShareOpen(false);
         return;
