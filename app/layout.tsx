@@ -1,21 +1,21 @@
+import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
-import type { ReactNode } from "react";
 import MobileShell from "./components/MobileShell";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Aiexor",
-  description: "Aiexor — image generation SaaS",
+  description: "Aiexor Studio",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body>
+    <html lang="en">
+      <body>
+        <Suspense fallback={<div className="content" />}>
           <MobileShell>{children}</MobileShell>
-        </body>
-      </html>
-    </ClerkProvider>
+        </Suspense>
+      </body>
+    </html>
   );
 }
