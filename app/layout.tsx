@@ -1,8 +1,7 @@
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { ReactNode } from "react";
-import MobileShell from "./components/MobileShell";
-import { Suspense } from "react";
+import { MobileShell } from "./components/MobileShell";
 
 export const metadata = {
   title: "Aiexor",
@@ -14,9 +13,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <ClerkProvider>
       <html lang="en">
         <body>
-          <Suspense fallback={<div className="min-h-dvh" />}>
-  <MobileShell>{children}</MobileShell>
-</Suspense>
+          <MobileShell>{children}</MobileShell>
         </body>
       </html>
     </ClerkProvider>

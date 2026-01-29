@@ -46,5 +46,3 @@ export function CreditsPill() {
     </Link>
   );
 }
-
-export default CreditsPill;

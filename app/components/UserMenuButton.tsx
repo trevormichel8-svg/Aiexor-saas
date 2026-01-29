@@ -88,5 +88,3 @@ export function UserMenuButton() {
     </div>
   );
 }
-
-export default UserMenuButton;
