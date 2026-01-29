@@ -1423,3 +1423,15 @@ body {
   border-color: rgba(0,255,255,0.30);
 }
 .btn-primary:hover{ background: rgba(0,255,255,0.18); }
+
+
+/* Clerk */
+.clerk-card{background:transparent !important; box-shadow:none !important;}
+
+
+/* Error UI */
+.error-box{margin-top:16px; padding:16px; border-radius:16px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10);}
+.error-pre{white-space:pre-wrap; word-break:break-word; font-size:12px; line-height:1.4; margin:0;}
+.error-digest{margin-top:8px; opacity:.7; font-size:12px;}
+.error-actions{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;}
+.row.gap{display:flex; gap:10px; flex-wrap:wrap;}
