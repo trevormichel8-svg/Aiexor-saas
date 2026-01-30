@@ -359,7 +359,7 @@ useEffect(() => {
                   onClick={() => setLiked((cur) => ({ ...cur, [c.key]: !cur[c.key] }))}
                   disabled={c.status === "loading"}
                 >
-                  <LikeIcon filled={!!liked[c.key]} classname="icon" />
+                  <LikeIcon filled={!!liked[c.key]} className="icon" />
                 </button>
 
                 <button
