@@ -352,11 +352,11 @@ useEffect(() => {
                 </button>
 
                 <button
-                  type=\"button\"
-                  className={`image-like-btn ${liked[c.key] ? \"active\" : \"\"}`}
-                  aria-label=\"Like image\"
+                  type="button"
+                  className={`image-like-btn ${liked[c.key] ? "active" : ""}`}
+                  aria-label="Like image"
                   onClick={() => setLiked((cur) => ({ ...cur, [c.key]: !cur[c.key] }))}
-                  disabled={c.status === \"loading\"}
+                  disabled={c.status === "loading"}
                 >
                   <LikeIcon filled={!!liked[c.key]} />
                 </button>
