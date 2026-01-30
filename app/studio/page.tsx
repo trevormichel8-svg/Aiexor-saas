@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { LikeIcon } from "../components/LikeIcon";
 
 type Provider = "openai" | "vertex";
 type Tab = "studio" | "history";
@@ -358,7 +359,7 @@ useEffect(() => {
                   onClick={() => setLiked((cur) => ({ ...cur, [c.key]: !cur[c.key] }))}
                   disabled={c.status === "loading"}
                 >
-                  <LikeIcon filled={!!liked[c.key]} />
+                  <LikeIcon filled={!!liked[c.key]} classname="icon" />
                 </button>
 
                 <button
