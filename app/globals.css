@@ -260,8 +260,6 @@ body {
   margin-top: auto;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
   padding: 0.5rem 0.75rem;
   background-color: var(--surface-color);
   /* Remove the teal divider line and rely on subtle shadow for separation */
@@ -286,8 +284,7 @@ body {
   color: var(--teal);
   box-shadow: 0 0 6px var(--rainbow-shadow);
   cursor: pointer;
-  margin-right: 0;
-  min-width: 0;
+  margin-right: 0.5rem;
   transition: background-color 0.2s;
 }
 .prompt-bar .plus-btn:hover {
@@ -516,17 +513,16 @@ body {
    near the bottom right of the card and allow remixing or downloading
    the individual image. */
 .image-controls {
-  position: static;
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
   display: flex;
-  flex-wrap: wrap;
   gap: 0.4rem;
-  justify-content: flex-end;
-  margin-top: 0.55rem;
+  z-index: 2;
 }
 
 /* Base styles for the per-image action buttons */
 .image-remix-btn,
-.image-like-btn,
 .image-download-btn {
   background-color: var(--surface-color);
   border: none;
@@ -1098,50 +1094,210 @@ body {
 }
 
 
-@media (max-width: 520px) {
-  .prompt-input {
-    flex: 1 1 100%;
-  }
+
+/* ===========================
+   ChatGPT-like mobile prompt bar (fixed)
+   =========================== */
+
+.prompt-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  z-index: 60;
+
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+
+  margin: 0 auto;
+  padding: 10px 12px;
+
+  width: 92%;
+  max-width: 800px;
+
+  background: rgba(10, 10, 10, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 26px;
+
+  box-shadow:
+    0 0 0 1px rgba(0, 255, 238, 0.08),
+    0 18px 46px rgba(0, 255, 238, 0.10);
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-
-.hamburger.icon-button {
-  width: 42px;
-  height: 42px;
+.prompt-container .plus-btn,
+.prompt-container .icon-button,
+.prompt-container .style-btn {
+  width: 40px;
+  height: 40px;
   border-radius: 999px;
-  padding: 0;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.06);
+
+  color: var(--teal);
+  box-shadow: 0 0 18px rgba(0, 255, 238, 0.10);
 }
 
-.image-like-btn.active {
-  background: rgba(0,255,238,0.14);
-  box-shadow: 0 0 16px rgba(0,255,238,0.22);
-}
+.prompt-container .generate-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
 
-.sidebar-section {
-  margin-top: 0.75rem;
-}
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-.sidebar-label {
-  display: block;
-  font-size: 0.85rem;
-  opacity: 0.85;
-  margin-bottom: 0.35rem;
-}
+  border: 1px solid rgba(0, 255, 238, 0.22);
+  background: rgba(0, 255, 238, 0.12);
 
-.sidebar-select {
-  width: 100%;
-  background: var(--bg-color);
-  border: 1px solid rgba(0,255,238,0.18);
   color: var(--text-color);
-  border-radius: 12px;
-  padding: 0.6rem 0.75rem;
-  box-shadow: 0 0 10px rgba(0,255,238,0.10);
-  outline: none;
+
+  box-shadow:
+    0 0 0 1px rgba(0, 255, 238, 0.08),
+    0 0 28px rgba(0, 255, 238, 0.18);
 }
 
-.sidebar-muted {
-  opacity: 0.8;
+.prompt-container .generate-btn:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+.prompt-container .provider-select,
+.prompt-container select {
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+  padding: 0 12px;
+}
+
+/* Prevent content from being hidden under the fixed prompt bar */
+.content {
+  padding-bottom: 120px;
+}
+
+/* ===========================
+   Tools bottom sheet (Styles)
+   =========================== */
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+  z-index: 70;
+}
+
+.sheet-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.style-menu {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  margin: 0 auto;
+  width: 100%;
+  max-width: 820px;
+
+  padding: 10px 12px 18px;
+
+  background: rgba(10, 10, 10, 0.96);
+  border: 1px solid rgba(0, 255, 238, 0.16);
+  border-bottom: none;
+  border-radius: 22px 22px 0 0;
+
+  box-shadow:
+    0 -10px 40px rgba(0, 255, 238, 0.10),
+    0 0 0 1px rgba(0, 255, 238, 0.08);
+
+  transform: translateY(110%);
+  transition: transform 0.22s ease;
+  z-index: 80;
+
+  max-height: min(70vh, 520px);
+  overflow: hidden;
+}
+
+.style-menu.open {
+  transform: translateY(0);
+}
+
+.sheet-handle {
+  width: 44px;
+  height: 5px;
+  border-radius: 999px;
+  margin: 6px auto 10px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.style-menu-header {
+  padding: 0.25rem 0.25rem 0.6rem;
+}
+
+.style-menu-grid {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0.25rem;
+  max-height: calc(min(70vh, 520px) - 80px);
+  overflow: auto;
+}
+
+/* Style pills keep the same scheme, just slightly roomier */
+.style-pill {
+  border: 1px solid rgba(0, 255, 238, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-color);
+  padding: 0.65rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+}
+
+.style-pill:hover {
+  background: rgba(0, 255, 238, 0.10);
+}
+
+
+
+/* Prompt input (ChatGPT-like textarea) */
+.prompt-input {
+  flex-grow: 1;
+  min-width: 0;
+
+  min-height: 24px;
+  max-height: 200px;
+  border: none;
+  outline: none;
+  background: transparent;
+
+  padding: 8px 12px;
+  font-size: 16px;
+  line-height: 1.35;
+
+  resize: none;
+  overflow-y: auto;
+
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: none;
+  margin: 0;
+  border-radius: 0;
+}
+
+.prompt-input::placeholder {
+  color: rgba(255, 255, 255, 0.42);
 }

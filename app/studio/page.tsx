@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { LikeIcon } from "../components/LikeIcon";
 
 type Provider = "openai" | "vertex";
 type Tab = "studio" | "history";
@@ -110,8 +109,17 @@ export default function StudioPage() {
   const [tab, setTab] = useState<Tab>("studio");
   const [prompt, setPrompt] = useState("");
   const [provider, setProvider] = useState<Provider>("openai");
-  const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [styleOpen, setStyleOpen] = useState(false);
+
+useEffect(() => {
+  if (!styleOpen) return;
+  const prev = document.body.style.overflow;
+  document.body.style.overflow = "hidden";
+  return () => {
+    document.body.style.overflow = prev;
+  };
+}, [styleOpen]);
+
   const [cards, setCards] = useState<OutputCard[]>([]);
   const [busy, setBusy] = useState(false);
   const [historyBusy, setHistoryBusy] = useState(false);
@@ -151,30 +159,6 @@ export default function StudioPage() {
   useEffect(() => {
     void fetchHistory();
   }, []);
-
-
-useEffect(() => {
-  if (typeof window === "undefined") return;
-
-  const applyParams = () => {
-    const sp = new URLSearchParams(window.location.search);
-    const v = sp.get("view");
-    setTab(v === "history" ? "history" : "studio");
-
-    const p = sp.get("provider");
-    if (p === "openai" || p === "vertex") setProvider(p);
-  };
-
-  applyParams();
-
-  window.addEventListener("aiexor:params", applyParams);
-  window.addEventListener("popstate", applyParams);
-  return () => {
-    window.removeEventListener("aiexor:params", applyParams);
-    window.removeEventListener("popstate", applyParams);
-  };
-}, []);
-
 
   async function callGenerate(p: string, prov: Provider) {
     const res = await fetch("/api/generate", {
@@ -291,6 +275,30 @@ useEffect(() => {
 
   return (
     <>
+      <div className="studio-tabs">
+        <button
+          type="button"
+          className={`tab-btn ${tab === "studio" ? "active" : ""}`}
+          onClick={() => setTab("studio")}
+        >
+          Studio
+        </button>
+        <button
+          type="button"
+          className={`tab-btn ${tab === "history" ? "active" : ""}`}
+          onClick={() => setTab("history")}
+        >
+          History
+        </button>
+
+        <div className="tabs-spacer" />
+
+        {tab === "history" ? (
+          <button type="button" className="tab-btn danger" onClick={() => void clearAll()} disabled={historyBusy}>
+            Clear all
+          </button>
+        ) : null}
+      </div>
 
       {emptyVisible ? (
         <div id="empty-state" className="empty-state">
@@ -354,16 +362,6 @@ useEffect(() => {
 
                 <button
                   type="button"
-                  className={`image-like-btn ${liked[c.key] ? "active" : ""}`}
-                  aria-label="Like image"
-                  onClick={() => setLiked((cur) => ({ ...cur, [c.key]: !cur[c.key] }))}
-                  disabled={c.status === "loading"}
-                >
-                  <LikeIcon filled={!!liked[c.key]} className="icon" />
-                </button>
-
-                <button
-                  type="button"
                   className="image-download-btn"
                   aria-label="Download image"
                   onClick={() => c.imageUrl && download(c.imageUrl)}
@@ -389,7 +387,11 @@ useEffect(() => {
         </div>
       </div>
 
-      <div id="style-menu" className={`style-menu ${styleOpen ? "open" : ""}`}>
+      
+      <div className={`sheet-backdrop ${styleOpen ? "open" : ""}`} onClick={() => setStyleOpen(false)} />
+<div id="style-menu" role="dialog" aria-modal="true" aria-label="Tools" className={`style-menu ${styleOpen ? "open" : ""}`}>
+        <div className="sheet-handle" aria-hidden="true" />
+
         <div className="style-menu-header">
           <div className="style-menu-title">Styles</div>
           <button type="button" className="icon-button" aria-label="Close styles" onClick={() => setStyleOpen(false)}>
@@ -417,7 +419,7 @@ useEffect(() => {
       </div>
 
       <form
-        className="prompt-bar"
+        className="prompt-container"
         id="prompt-form"
         autoComplete="off"
         onSubmit={(e) => {
@@ -434,6 +436,17 @@ useEffect(() => {
         >
           <BrushIcon />
         </button>
+
+        <select
+          id="provider-select"
+          className="provider-select"
+          aria-label="Image model provider"
+          value={provider}
+          onChange={(e) => setProvider(e.target.value as Provider)}
+        >
+          <option value="openai">OpenAI</option>
+          <option value="vertex">Vertex AI</option>
+        </select>
 
         <textarea
           id="prompt-input"
