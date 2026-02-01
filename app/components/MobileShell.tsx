@@ -1,157 +1,114 @@
 "use client";
 
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { ReactNode } from "react";
-import { SignedIn, SignedOut, SignInButton, useClerk } from "@clerk/nextjs";
-import { UserMenuButton } from "./UserMenuButton";
-import { CreditsPill } from "./CreditsPill";
 
-type Provider = "openai" | "vertex";
+type MobileShellProps = {
+  children: React.ReactNode;
+};
 
-type NavItem = { href: string; label: string; icon: "sparkles" | "card" | "user" };
+const MODEL_STORAGE_KEY = "aiexor:model";
 
-function IconSparkles() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 2l1.5 5L19 9l-5.5 2L12 16l-1.5-5L5 9l5.5-2L12 2z" />
-      <path d="M4 14l.8 2.6L7.4 18l-2.6.8L4 21l-.8-2.2L1 18l2.2-.8L4 14z" />
-    </svg>
-  );
-}
-function IconCreditCard() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="2" y="5" width="20" height="14" rx="2" />
-      <path d="M2 10h20" />
-    </svg>
-  );
-}
-function IconUser() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="7" r="4" />
-      <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
-    </svg>
-  );
-}
-function IconEllipsis() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="1" />
-      <circle cx="19" cy="12" r="1" />
-      <circle cx="5" cy="12" r="1" />
-    </svg>
-  );
-}
-function IconLogOut() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
-  );
-}
-function IconMenu() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M4 6h16" />
-      <path d="M4 12h16" />
-      <path d="M4 18h16" />
-    </svg>
-  );
-}
-
-function NavIcon({ icon }: { icon: NavItem["icon"] }) {
-  if (icon === "card") return <IconCreditCard />;
-  if (icon === "user") return <IconUser />;
-  return <IconSparkles />;
-}
-
-function pageLabel(pathname: string) {
-  if (pathname.startsWith("/studio")) return "Studio";
-  if (pathname.startsWith("/billing")) return "Billing";
-  if (pathname.startsWith("/account")) return "Account";
-  return "Home";
-}
-
-export function MobileShell({ children }: { children: ReactNode }) {
-  const [open, setOpen] = useState(false);
-  const [provider, setProvider] = useState<Provider>("openai");
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const saved = window.localStorage.getItem("aiexor_provider") as Provider | null;
-    if (saved === "openai" || saved === "vertex") setProvider(saved);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem("aiexor_provider", provider);
-    window.dispatchEvent(new StorageEvent("storage", { key: "aiexor_provider", newValue: provider }));
-  }, [provider]);
+export default function MobileShell({ children }: MobileShellProps) {
   const pathname = usePathname();
-  const clerk = useClerk();
+  const [open, setOpen] = useState(false);
 
-  const [moreOpen, setMoreOpen] = useState(false);
-  const moreRef = useRef<HTMLDivElement | null>(null);
+  const [model, setModel] = useState<string>(() => {
+    if (typeof window === "undefined") return "gpt-image-1";
+    return window.localStorage.getItem(MODEL_STORAGE_KEY) || "gpt-image-1";
+  });
 
-  const items: NavItem[] = useMemo(
-    () => [
-      { href: "/studio", label: "Studio", icon: "sparkles" },
-      { href: "/billing", label: "Billing", icon: "card" },
-      { href: "/account", label: "Account", icon: "user" },
-    ],
-    []
-  );
-
-  useEffect(() => {
-    setOpen(false);
-    setMoreOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
-    document.title = `Aiexor • ${pageLabel(pathname)}`;
-  }, [pathname]);
-
-  useEffect(() => {
-    function onDocClick(e: MouseEvent) {
-      if (!moreOpen) return;
-      const t = e.target as Node | null;
-      if (!t) return;
-      if (moreRef.current?.contains(t)) return;
-      setMoreOpen(false);
-    }
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, [moreOpen]);
+  const shareUrl = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    return window.location.href;
+  }, []);
 
   function isActive(href: string) {
     return pathname === href;
   }
 
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  // Persist model selection + notify app (optional listener elsewhere)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(MODEL_STORAGE_KEY, model);
+    window.dispatchEvent(new CustomEvent("aiexor:model-change", { detail: { model } }));
+  }, [model]);
+
+  async function onShare() {
+    try {
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        await (navigator as any).share({
+          title: "Aiexor",
+          url: shareUrl,
+        });
+        return;
+      }
+    } catch {
+      // ignore share cancel/errors
+    }
+
+    // fallback: copy link
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      // If you have a toast system, hook it up here.
+    } catch {
+      // ignore
+    }
+  }
+
   return (
     <div className="mobile-frame">
+      {/* TOP BAR */}
       <div className="top-bar">
         <div className="top-left">
-          <button className="hamburger icon-button" aria-label="Menu" type="button" onClick={() => setOpen(true)}>
+          <button
+            className="hamburger icon-button"
+            aria-label="Menu"
+            type="button"
+            onClick={() => setOpen(true)}
+          >
             <IconMenu />
           </button>
           <div className="app-label">Aiexor</div>
         </div>
 
         <div className="top-right">
-</div>
-            ) : null}
-          </div>
+          <Link
+            className={`icon-button ${isActive("/signin") ? "active" : ""}`}
+            aria-label="Sign in"
+            href="/signin"
+          >
+            <IconUser />
+          </Link>
+
+          <button className="icon-button" aria-label="Share" type="button" onClick={onShare}>
+            <IconShare />
+          </button>
         </div>
       </div>
 
+      {/* MAIN CONTENT */}
       <main className="content">{children}</main>
 
-      <div id="sidebar" className={`sidebar ${open ? "open" : ""}`} aria-hidden={!open}>
+      {/* SIDEBAR OVERLAY */}
+      <button
+        type="button"
+        aria-label="Close sidebar overlay"
+        className={`sidebar-overlay ${open ? "open" : ""}`}
+        onClick={() => setOpen(false)}
+      />
+
+      {/* SIDEBAR */}
+      <aside id="sidebar" className={`sidebar ${open ? "open" : ""}`} aria-hidden={!open}>
         <button
           id="close-sidebar"
           className="close-sidebar-btn"
@@ -163,35 +120,126 @@ export function MobileShell({ children }: { children: ReactNode }) {
         </button>
 
         <div className="sidebar-content">
-          <h2>Menu</h2>
-          <nav className="sidebar-nav">
-            {items.map((it) => (
-              <Link
-                key={it.href}
-                href={it.href}
-                className={`sidebar-link ${isActive(it.href) ? "active" : ""}`}
-                onClick={() => setOpen(false)}
-              >
-                <NavIcon icon={it.icon} />
-                <span>{it.label}</span>
-              </Link>
-            ))}
-          </nav>
+          <div className="sidebar-section">
+            <div className="sidebar-title">Account</div>
 
-          <SignedIn>
-            <div style={{ marginTop: "1rem" }}>
-              <button
-                type="button"
-                className="sidebar-link"
-                onClick={() => clerk.signOut({ redirectUrl: "/" })}
-              >
-                <IconLogOut />
-                <span>Sign out</span>
-              </button>
+            {/* Keep only what you asked for */}
+            <Link className="sidebar-link" href="/pricing" onClick={() => setOpen(false)}>
+              <span className="sidebar-link-icon">
+                <IconBolt />
+              </span>
+              Upgrade
+            </Link>
+
+            <Link className="sidebar-link" href="/pricing#credits" onClick={() => setOpen(false)}>
+              <span className="sidebar-link-icon">
+                <IconCoins />
+              </span>
+              Credits
+            </Link>
+          </div>
+
+          {/* MODEL SELECTOR moved into sidebar */}
+          <div className="sidebar-section">
+            <div className="sidebar-title">Model</div>
+
+            <label className="sidebar-label" htmlFor="model-select">
+              Choose model
+            </label>
+
+            <select
+              id="model-select"
+              className="sidebar-select"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+            >
+              <option value="gpt-image-1">gpt-image-1</option>
+              <option value="dall-e-3">dall-e-3</option>
+              <option value="dall-e-2">dall-e-2</option>
+            </select>
+
+            <div className="sidebar-hint">
+              This selection is saved on your device and can be read by your generator UI.
             </div>
-          </SignedIn>
+          </div>
+
+          {/* You can add other non-account sidebar items here later, but keeping it minimal */}
         </div>
-      </div>
+      </aside>
     </div>
+  );
+}
+
+/* ----------------------------- ICONS (inline) ----------------------------- */
+
+function IconMenu() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M4 7h16M4 12h16M4 17h16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function IconShare() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M16 8a3 3 0 1 0-2.83-4H13a3 3 0 0 0 3 4ZM6 14a3 3 0 1 0 2.83 4H9a3 3 0 0 0-3-4Zm10 1-8-4m8-3-8 4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function IconUser() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M20 21a8 8 0 1 0-16 0M12 13a5 5 0 1 0-5-5 5 5 0 0 0 5 5Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function IconBolt() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function IconCoins() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M12 6c4.42 0 8-1.34 8-3s-3.58-3-8-3-8 1.34-8 3 3.58 3 8 3Zm8 3c0 1.66-3.58 3-8 3s-8-1.34-8-3m16 4c0 1.66-3.58 3-8 3s-8-1.34-8-3m16 4c0 1.66-3.58 3-8 3s-8-1.34-8-3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
