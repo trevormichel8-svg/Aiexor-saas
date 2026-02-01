@@ -49,6 +49,23 @@ function DownloadIcon() {
     </svg>
   );
 }
+function LikeIcon({ filled, className }: { filled?: boolean; className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M20.8 4.6c-1.6-1.6-4.2-1.6-5.8 0L12 7.6 9 4.6c-1.6-1.6-4.2-1.6-5.8 0-1.6 1.6-1.6 4.2 0 5.8l8.8 8.8 8.8-8.8c1.6-1.6 1.6-4.2 0-5.8z" />
+    </svg>
+  );
+}
+
 function RemixIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -108,7 +125,24 @@ export default function StudioPage() {
 
   const [tab, setTab] = useState<Tab>("studio");
   const [prompt, setPrompt] = useState("");
-  const [provider, setProvider] = useState<Provider>("openai");
+  const [provider, setProvider] = useState<Provider>(() => {
+  const [liked, setLiked] = useState<Record<string, boolean>>({});
+
+    if (typeof window === "undefined") return "openai";
+    const saved = window.localStorage.getItem("aiexor_provider");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== "aiexor_provider") return;
+      const v = e.newValue;
+      if (v === "openai" || v === "vertex") setProvider(v);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+    return saved === "vertex" ? "vertex" : "openai";
+  });
   const [styleOpen, setStyleOpen] = useState(false);
 
 useEffect(() => {
@@ -276,7 +310,17 @@ useEffect(() => {
   return (
     <>
       <div className="studio-tabs">
-        <button
+                        <button
+                  type="button"
+                  className={`image-like-btn ${liked[c.key] ? "active" : ""}`}
+                  aria-label="Like image"
+                  onClick={() => setLiked((cur) => ({ ...cur, [c.key]: !cur[c.key] }))}
+                  disabled={c.status === "loading"}
+                >
+                  <LikeIcon filled={!!liked[c.key]} className="icon" />
+                </button>
+
+<button
           type="button"
           className={`tab-btn ${tab === "studio" ? "active" : ""}`}
           onClick={() => setTab("studio")}

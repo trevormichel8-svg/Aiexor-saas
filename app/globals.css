@@ -168,8 +168,10 @@ body {
 .icon-button {
   background-color: var(--surface-color);
   border: none;
-  border-radius: var(--radius-pill);
-  padding: 0.5rem;
+  border-radius: 9999px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -178,6 +180,7 @@ body {
   cursor: pointer;
   transition: background-color 0.2s;
 }
+
 .icon-button svg {
   width: 20px;
   height: 20px;
@@ -276,8 +279,10 @@ body {
 .prompt-bar .plus-btn {
   background-color: var(--surface-color);
   border: none;
-  border-radius: var(--radius-pill);
-  padding: 0.5rem;
+  border-radius: 9999px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -287,6 +292,7 @@ body {
   margin-right: 0.5rem;
   transition: background-color 0.2s;
 }
+
 .prompt-bar .plus-btn:hover {
   background-color: var(--bg-color);
 }
@@ -513,13 +519,13 @@ body {
    near the bottom right of the card and allow remixing or downloading
    the individual image. */
 .image-controls {
-  position: absolute;
-  bottom: 0.5rem;
-  right: 0.5rem;
+  position: static;
   display: flex;
   gap: 0.4rem;
-  z-index: 2;
+  justify-content: flex-end;
+  padding-top: 0.6rem;
 }
+
 
 /* Base styles for the per-image action buttons */
 .image-remix-btn,
@@ -1300,4 +1306,40 @@ body {
 
 .prompt-input::placeholder {
   color: rgba(255, 255, 255, 0.42);
+}
+
+.image-like-btn {
+  background-color: var(--surface-color);
+  border: none;
+  border-radius: 9999px;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--teal);
+  box-shadow: 0 0 6px var(--rainbow-shadow);
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+
+.image-like-btn.active {
+  color: var(--teal);
+  transform: scale(1.04);
+}
+
+
+
+.sidebar-section { margin-top: 14px; }
+.sidebar-section-title { font-size: 12px; letter-spacing: 0.16em; opacity: 0.7; margin-bottom: 10px; }
+.sidebar-label { display: block; font-size: 12px; opacity: 0.8; margin-bottom: 6px; }
+.sidebar-select {
+  width: 100%;
+  background-color: var(--surface-color);
+  border: none;
+  border-radius: 16px;
+  padding: 12px 12px;
+  color: inherit;
+  box-shadow: 0 0 6px var(--rainbow-shadow);
 }

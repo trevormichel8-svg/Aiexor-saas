@@ -8,6 +8,8 @@ import { SignedIn, SignedOut, SignInButton, useClerk } from "@clerk/nextjs";
 import { UserMenuButton } from "./UserMenuButton";
 import { CreditsPill } from "./CreditsPill";
 
+type Provider = "openai" | "vertex";
+
 type NavItem = { href: string; label: string; icon: "sparkles" | "card" | "user" };
 
 function IconSparkles() {
@@ -77,6 +79,19 @@ function pageLabel(pathname: string) {
 
 export function MobileShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [provider, setProvider] = useState<Provider>("openai");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = window.localStorage.getItem("aiexor_provider") as Provider | null;
+    if (saved === "openai" || saved === "vertex") setProvider(saved);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("aiexor_provider", provider);
+    window.dispatchEvent(new StorageEvent("storage", { key: "aiexor_provider", newValue: provider }));
+  }, [provider]);
   const pathname = usePathname();
   const clerk = useClerk();
 
@@ -128,50 +143,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
         </div>
 
         <div className="top-right">
-          <SignedIn>
-            <CreditsPill />
-          </SignedIn>
-
-          <SignedOut>
-            <SignInButton mode="modal">
-              <button id="sign-in-btn" className="icon-button" aria-label="Sign in" type="button">
-                <IconUser />
-              </button>
-            </SignInButton>
-          </SignedOut>
-
-          <SignedIn>
-            <UserMenuButton />
-          </SignedIn>
-
-          <div className="more-menu" ref={moreRef}>
-            <button className="icon-button" aria-label="More" type="button" onClick={() => setMoreOpen((v) => !v)}>
-              <IconEllipsis />
-            </button>
-
-            {moreOpen ? (
-              <div className="more-pop" role="menu" aria-label="More menu">
-                {items.map((it) => (
-                  <Link key={it.href} className="more-item" href={it.href} onClick={() => setMoreOpen(false)}>
-                    <NavIcon icon={it.icon} />
-                    <span>{it.label}</span>
-                  </Link>
-                ))}
-
-                <SignedIn>
-                  <button
-                    className="more-item"
-                    type="button"
-                    onClick={() => {
-                      setMoreOpen(false);
-                      clerk.signOut({ redirectUrl: "/" });
-                    }}
-                  >
-                    <IconLogOut />
-                    <span>Sign out</span>
-                  </button>
-                </SignedIn>
-              </div>
+</div>
             ) : null}
           </div>
         </div>
