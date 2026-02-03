@@ -1356,6 +1356,7 @@ body {
     border-color: rgba(0, 255, 238, 0.16);
   }
 
+}
 .image-like-btn {
   background-color: var(--surface-color);
   border: none;
