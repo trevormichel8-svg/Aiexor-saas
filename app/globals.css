@@ -1106,34 +1106,46 @@ body {
    =========================== */
 
 .prompt-container {
+  /* 1. LAYOUT & CENTERING */
   position: fixed;
-  left: 50%;
+  left: 0;
   right: 0;
-  bottom: calc(env(safe-area-inset-bottom, 20px) + 24px);
-  transform: translateX(-50%);
-  z-index: 60;
+  margin: 0 auto;           /* Centers fixed elements with a width */
+  width: 92%;               /* Fluid width for mobile */
+  max-width: 600px;         /* Caps width for tablets/desktop */
+  box-sizing: border-box;   /* CRITICAL: includes padding in width calculation */
+  z-index: 100;
 
+  /* 2. CHATGPT POSITIONING */
+  bottom: 0;                /* Aligns to bottom edge */
+  /* Adds padding to handle iPhone notches and screen edges */
+  padding: 10px 14px calc(env(safe-area-inset-bottom, 20px) + 12px);
+
+  /* 3. FLEXBOX SETTINGS */
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: center;      /* Keeps buttons and input centered vertically */
+  gap: 8px;                 /* Slightly tighter gap for mobile */
 
-  margin: 0 auto;
-  padding: 10px 12px;
-
-  width: 40%;
-  max-width: 400px;
-
+  /* 4. VISUALS */
   background: rgba(10, 10, 10, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: 26px;
-
-  box-shadow:
-    0 0 0 1px rgba(0, 255, 238, 0.08),
-    0 18px 46px rgba(0, 255, 238, 0.10);
-
+  border-radius: 26px;      /* ChatGPT uses ~24px to 28px */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 }
+
+/* 5. THE INPUT FIELD (Critical for the 'fit') */
+.prompt-input {
+  flex: 1;                  /* Forces the input to fill all empty space */
+  min-width: 0;             /* Prevents input from forcing container wide */
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 16px;          /* Prevents auto-zoom on iOS focus */
+}
+
 
 .prompt-container .plus-btn,
 .prompt-container .icon-button,
