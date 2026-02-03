@@ -1114,14 +1114,14 @@ body {
   z-index: 60;
 
   display: flex;
-  align-items: centered;
+  align-items: center;
   gap: 10px;
 
   margin: 0 auto;
   padding: 10px 12px;
 
-  width: 92%;
-  max-width: 4000px;
+  width: 40%;
+  max-width: 400px;
 
   background: rgba(10, 10, 10, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.10);
