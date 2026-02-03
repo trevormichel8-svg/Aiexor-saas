@@ -1119,8 +1119,8 @@ body {
   margin: 0 auto;
   padding: 10px 12px;
 
-  width: 92%;
-  max-width: 600px;
+  width: 80%;
+  max-width: 800px;
 
   background: rgba(10, 10, 10, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.10);
