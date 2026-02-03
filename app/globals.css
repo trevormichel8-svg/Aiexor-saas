@@ -1121,7 +1121,7 @@ body {
   padding: 10px 12px;
 
   width: 92%;
-  max-width: 800px;
+  max-width: 4000px;
 
   background: rgba(10, 10, 10, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.10);
@@ -1189,7 +1189,7 @@ body {
 
 /* Prevent content from being hidden under the fixed prompt bar */
 .content {
-  padding-bottom: 120px;
+  padding-bottom: 20px;
 }
 
 /* ===========================
