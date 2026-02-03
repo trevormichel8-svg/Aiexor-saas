@@ -405,7 +405,7 @@ export default function StudioPage() {
       </div>
 
       <form
-        className="prompt-bar"
+        className="prompt-container"
         id="prompt-form"
         autoComplete="off"
         onSubmit={(e) => {
