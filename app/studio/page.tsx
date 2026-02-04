@@ -106,7 +106,7 @@ export default function StudioPage() {
     []
   );
 
-  const [tab, setTab] = useState<Tab>("studio");
+  const [tab, setTab] = useState("studio");
   const [prompt, setPrompt] = useState("");
   const { provider } = useProvider();
   const [styleOpen, setStyleOpen] = useState(false);
