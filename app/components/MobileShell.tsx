@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { SignedIn, SignedOut, SignInButton, useClerk } from "@clerk/nextjs";
 import { UserMenuButton } from "./UserMenuButton";
 import { CreditsPill } from "./CreditsPill";
+import { useProvider, type ProviderId } from "../providers/provider-context";
 
 type NavItem = { href: string; label: string; icon: "sparkles" | "card" | "user" };
 
@@ -79,6 +80,16 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const clerk = useClerk();
+
+  const { provider, setProvider } = useProvider();
+
+  const providers: { id: ProviderId; label: string }[] = useMemo(
+    () => [
+      { id: "openai", label: "OpenAI" },
+      { id: "vertex", label: "Vertex AI" },
+    ],
+    []
+  );
 
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement | null>(null);
@@ -192,6 +203,27 @@ export function MobileShell({ children }: { children: ReactNode }) {
 
         <div className="sidebar-content">
           <h2>Menu</h2>
+          {pathname.startsWith("/studio") ? (
+            <div className="sidebar-section" style={{ marginTop: "0.75rem" }}>
+              <div className="sidebar-label" style={{ fontSize: "0.85rem", opacity: 0.9, marginBottom: "0.35rem" }}>
+                Provider
+              </div>
+              <select
+                id="provider-select-sidebar"
+                className="provider-select"
+                aria-label="Image model provider"
+                value={provider}
+                onChange={(e) => setProvider(e.target.value as ProviderId)}
+              >
+                {providers.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
+
           <nav className="sidebar-nav">
             {items.map((it) => (
               <Link
