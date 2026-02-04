@@ -4,8 +4,8 @@ import type { ReactNode } from "react";
 import { MobileShell } from "./components/MobileShell";
 
 export const metadata = {
-  title: "Aiexor",
-  description: "Aiexor — image generation SaaS",
+  title: "Ai.exor",
+  description: "Ai.exor image generator,
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
