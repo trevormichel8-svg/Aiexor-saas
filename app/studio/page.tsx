@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Provider = "openai" | "vertex";
-type Tab = "studio" | "history";
+
 
 type OutputCard = {
   key: string;
@@ -100,8 +100,10 @@ export default function StudioPage() {
       "Watercolor","Oil Painting","Acrylic","Ink Drawing","Charcoal","Pastel","Geometric","Kawaii","Retro",
       "Vintage","Psychedelic","Horror","Stencil","Indigenous","Coloring Book","Comic","Photo Realistic","Highly Detailed",
       "Silhouette","Mosaic","Realistic Anime","Vibrant","Epic Origami","Abstract Curves","CGI","Black&White","3D Shading",
-      "Quilling","Candy","Double Exposure","Kintsugi","Glass","Movie Poster","Filigree","Fractal","Holographic","Golder Ratio",
-      "Iridescent","Topography","Silver Nitrate","Embossed","Embroidery"
+      "Quilling","Candy","Double Exposure","Kintsugi","Glass","Movie Poster","Filigree","Fractal","Holographic","Golden Ratio",
+      "Iridescent","Topography","Silver Nitrate","Embossed","Embroidery","Smoke","Cloud","Chibi","Disney","Doodle","Airbrush",
+      "Glitchcore","Cinematic"
+      
     ],
     []
   );
