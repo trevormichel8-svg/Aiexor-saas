@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-
-type Provider = "openai" | "vertex";
-
+import { useProvider, type ProviderId } from "../providers/provider-context";
 
 type OutputCard = {
   key: string;
   historyId?: string;
   prompt: string;
-  provider: Provider;
+  provider: ProviderId;
   imageUrl?: string;
   status: "loading" | "ready" | "error";
   message?: string;
@@ -19,7 +17,7 @@ type OutputCard = {
 type HistoryItem = {
   id: string;
   prompt: string;
-  provider: Provider | string;
+  provider: ProviderId | string;
   image: string;
   createdAt: string;
 };
@@ -110,7 +108,7 @@ export default function StudioPage() {
 
   const [tab, setTab] = useState<Tab>("studio");
   const [prompt, setPrompt] = useState("");
-  const [provider, setProvider] = useState<Provider>("openai");
+  const { provider } = useProvider();
   const [styleOpen, setStyleOpen] = useState(false);
   const [cards, setCards] = useState<OutputCard[]>([]);
   const [busy, setBusy] = useState(false);
@@ -136,7 +134,7 @@ export default function StudioPage() {
           key: g.id,
           historyId: g.id,
           prompt: g.prompt,
-          provider: (g.provider === "vertex" ? "vertex" : "openai") as Provider,
+          provider: (g.provider === "vertex" ? "vertex" : "openai") as ProviderId,
           imageUrl: g.image,
           status: "ready",
           createdAt: g.createdAt,
@@ -152,7 +150,7 @@ export default function StudioPage() {
     void fetchHistory();
   }, []);
 
-  async function callGenerate(p: string, prov: Provider) {
+  async function callGenerate(p: string, prov: ProviderId) {
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -180,7 +178,7 @@ export default function StudioPage() {
     return { images, generationId: json?.generationId as string | undefined };
   }
 
-  async function generateNew(p: string, prov: Provider) {
+  async function generateNew(p: string, prov: ProviderId) {
     const clean = p.trim();
     if (!clean) return;
 
@@ -424,17 +422,6 @@ export default function StudioPage() {
         >
           <BrushIcon />
         </button>
-
-        <select
-          id="provider-select"
-          className="provider-select"
-          aria-label="Image model provider"
-          value={provider}
-          onChange={(e) => setProvider(e.target.value as Provider)}
-        >
-          <option value="openai">OpenAI</option>
-          <option value="vertex">Vertex AI</option>
-        </select>
 
         <textarea
           id="prompt-input"
