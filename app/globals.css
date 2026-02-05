@@ -9,20 +9,21 @@
 /* CSS variables for colours and spacing */
 /* Universal colour scheme */
 :root {
-  --Text: #ffffff;
-  --Text-shadow: #1af00e;
-  --Borders: #1af00e;
-  --icon: #ffffff;
-  --Button-pill-background: #000;
-  --background: linear-gradient(135deg, #001010 100%, #00ffee 0%);
-  --Box-shadow: #ffffff;
+ background: var(--background);
+ background-color: var(--bg-color);
+ border: var(--border-color);
+ box-shadow: var(--box-shadow);  
+ color: var(--text);
+ text-shadow: var(--text-glow);
+  
 
   /* Compatibility mapping (existing styles) */
-  --bg-color: #001010;
-  --surface-color: #000;
-  --text-color: var(--Text);
-  --text-shadow: var(--Text-shadow);
-  --teal: var(--icon);
+  --bg-color: var(#000);
+  --background: var(linear-gradient: 135deg, #001010 100%, #00ffee 0%);
+  --text: var(#fffffff);
+  --text-glow: var(#1af00e);
+  --box-shadow: var(#ffffff);
+  --border: var(#1af00e);
   --radius-pill: 24px;
   --radius-round: 50%;
   --padding: 1rem;
