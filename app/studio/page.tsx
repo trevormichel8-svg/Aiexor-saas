@@ -265,30 +265,6 @@ export default function StudioPage() {
 
   return (
     <>
-      <div className="studio-tabs">
-        <button
-          type="button"
-          className={`tab-btn ${tab === "studio" ? "active" : ""}`}
-          onClick={() => setTab("studio")}
-        >
-          Studio
-        </button>
-        <button
-          type="button"
-          className={`tab-btn ${tab === "history" ? "active" : ""}`}
-          onClick={() => setTab("history")}
-        >
-          History
-        </button>
-
-        <div className="tabs-spacer" />
-
-        {tab === "history" ? (
-          <button type="button" className="tab-btn danger" onClick={() => void clearAll()} disabled={historyBusy}>
-            Clear all
-          </button>
-        ) : null}
-      </div>
 
       {emptyVisible ? (
         <div id="empty-state" className="empty-state">
