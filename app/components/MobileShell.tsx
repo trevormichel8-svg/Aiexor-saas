@@ -97,7 +97,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   useEffect(() => {
-    document.title = `Aiexor • ${pageLabel(pathname)}`;
+    document.title = `AI.Exor • ${pageLabel(pathname)}`;
   }, [pathname]);
 
 
@@ -112,7 +112,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
           <button className="hamburger icon-button" aria-label="Menu" type="button" onClick={() => setOpen(true)}>
             <IconMenu />
           </button>
-          <div className="app-label">Aiexor</div>
+          <div className="app-label">AI.Exor</div>
         </div>
 
         <div className="top-right">
@@ -121,12 +121,13 @@ export function MobileShell({ children }: { children: ReactNode }) {
           </SignedIn>
 
           <SignedOut>
-            <SignInButton mode="modal">
-              <button id="sign-in-btn" className="icon-button" aria-label="Sign in" type="button">
-                <IconUser />
-              </button>
-            </SignInButton>
-          </SignedOut>
+  <SignInButton mode="modal">
+    <button className="credits-pill" aria-label="Sign in" type="button">
+      <IconUser />
+      <span>Sign in</span>
+    </button>
+  </SignInButton>
+</SignedOut>
 
           <SignedIn>
             <UserMenuButton />
