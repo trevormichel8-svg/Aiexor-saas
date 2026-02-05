@@ -1139,7 +1139,7 @@ body {
 
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-}
+
 
 /* Desktop: fixed max-width like ChatGPT */
 @media (min-width: 768px) {
