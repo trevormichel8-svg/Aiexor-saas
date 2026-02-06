@@ -180,26 +180,4 @@ export function MobileShell({ children }: { children: ReactNode }) {
                 className={`sidebar-link ${isActive(it.href) ? "active" : ""}`}
                 onClick={() => setOpen(false)}
               >
-                <NavIcon icon={it.icon} />
-                <span>{it.label}</span>
-              </Link>
-            ))}
-          </nav>
-
-          <SignedIn>
-            <div style={{ marginTop: "1rem" }}>
-              <button
-                type="button"
-                className="sidebar-link"
-                onClick={() => clerk.signOut({ redirectUrl: "/" })}
-              >
-                <IconLogOut />
-                <span>Sign out</span>
-              </button>
-            </div>
-          </SignedIn>
-        </div>
-      </div>
-    </div>
-  );
-}
+    
