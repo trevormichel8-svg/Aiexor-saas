@@ -1495,3 +1495,29 @@ select:hover {
   border-color: rgba(26, 240, 14, 0.85) !important;
 }
 
+/* --- Force Credits pill to match app-label pill height exactly --- */
+.credits-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+
+  /* Match app-label pill sizing */
+  padding: 0.32rem 0.7rem !important;
+  font-size: 1.05rem !important;
+  line-height: 1 !important;
+
+  /* Ensure content can't inflate height */
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.credits-pill span {
+  line-height: 1 !important;
+  display: block;              /* prevents inline baseline quirks */
+}
+
+.credits-pill svg {
+  width: 16px !important;
+  height: 16px !important;
+  display: block;              /* prevents svg baseline adding extra space */
+  flex: 0 0 16px;
+}
