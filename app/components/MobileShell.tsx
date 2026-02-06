@@ -95,16 +95,19 @@ export function MobileShell({ children }: { children: ReactNode }) {
     <div className="mobile-frame">
       <div className="top-bar">
         <div className="top-left">
-          <button
-            className="hamburger icon-button"
-            aria-label="Menu"
-            type="button"
-            onClick={() => setOpen(true)}
-          >
-            <IconMenu />
-          </button>
-          <div className="app-label">AI.Exor</div>
-        </div>
+  <button
+    className="hamburger icon-button"
+    aria-label="Menu"
+    type="button"
+    onClick={() => setOpen(true)}
+  >
+    <IconMenu />
+  </button>
+
+  <div className="app-label-pill">
+    <div className="app-label">AI.Exor</div>
+  </div>
+</div>
 
         <div className="top-right">
           <SignedIn>
