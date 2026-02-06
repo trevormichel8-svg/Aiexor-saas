@@ -103,9 +103,10 @@ export function MobileShell({ children }: { children: ReactNode }) {
   >
     <IconMenu />
   </button>
-<div className="app-label-pill">
+
+          <div className="app-label-pill">
     <div
-    <div className="app-label">AI.Exor</div>
+    className="app-label">AI.Exor</div>
   </div>
 </div>
 
