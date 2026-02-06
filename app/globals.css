@@ -280,7 +280,7 @@ body {
   padding: 0.5rem 0.75rem;
   background-color: var(--surface-color);
   /* Remove the teal divider line and rely on subtle shadow for separation */
-  border-top: none;
+  border-top: var(--Borders);
   /* Subtle shadow above the prompt bar to separate it from content */
   box-shadow: 0 -2px 8px var(--rainbow-shadow);
   /* Remove rounded corners to avoid the appearance of a single big pill */
@@ -292,7 +292,7 @@ body {
 }
 .prompt-bar .plus-btn {
   background-color: var(--surface-color);
-  border: none;
+  border: var(--Borders);
   border-radius: 9999px;
   width: 44px;
   height: 44px;
@@ -548,7 +548,7 @@ body {
 .image-remix-btn,
 .image-download-btn {
   background-color: var(--surface-color);
-  border: none;
+  border: var(--Borders);
   border-radius: 50%;
   padding: 0.4rem;
   display: flex;
@@ -606,7 +606,7 @@ body {
 .preset-btn {
   background-color: var(--surface-color);
   color: var(--teal);
-  border: 1px var(--none);
+  border: 1px var(--Borders);
   border-radius: var(--radius-pill);
   padding: 0.4rem 0.8rem;
   font-size: 0.8rem;
@@ -717,7 +717,7 @@ body {
   top: 0.5rem;
   right: 0.75rem;
   background: transparent;
-  border: none;
+  border: var(--Borders);
   color: var(--teal);
   font-size: 1.5rem;
   cursor: pointer;
