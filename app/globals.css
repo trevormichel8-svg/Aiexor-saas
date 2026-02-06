@@ -1419,3 +1419,38 @@ body {
   color: inherit;
   box-shadow: 0 0 6px var(--rainbow-shadow);
 }
+
+/* Force visible neon borders on form controls + buttons */
+button,
+input,
+textarea,
+select {
+  border: 1px solid var(--Borders) !important;
+}
+
+/* Keep it clean and readable */
+input,
+textarea,
+select {
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--Text);
+}
+
+/* Focus ring: green border + white box glow */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: var(--Borders) !important;
+  box-shadow: 0 0 0 2px rgba(26, 240, 14, 0.35), 0 0 12px var(--Box-shadow);
+}
+
+/* Hover: slightly brighter border */
+button:hover,
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: rgba(26, 240, 14, 0.85) !important;
+}
+
