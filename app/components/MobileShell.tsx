@@ -184,4 +184,5 @@ export function MobileShell({ children }: { children: ReactNode }) {
       </div>
     </div>
   );
+}
     
