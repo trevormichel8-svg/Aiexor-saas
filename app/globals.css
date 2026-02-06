@@ -725,8 +725,8 @@ body {
   line-height: 1;
   text-shadow: 0 0 6px var(--text-shadow);
 }
-.close-sidebar-btn:hover {session
-  color: var(--text-color);
+.close-sidebar-btn:hover {
+ color: var(--text-color);
 }
 
 
