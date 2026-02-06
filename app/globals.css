@@ -183,7 +183,8 @@ body {
   /* a. Smaller app label pill */
   padding: 0.32rem 0.7rem;
   font-size: 1.05rem;
-
+  line-height: 1;
+  
   border: 1px solid var(--Borders);
   box-shadow: 0 0 8px var(--rainbow-shadow);
 
