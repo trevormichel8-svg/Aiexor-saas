@@ -10,8 +10,8 @@
 :root {
   /* Universal color scheme */
   --Text: #ffffff;
-  --Text-shadow: #1af00e;
-  --Borders: #1af00e;
+  --Text-shadow: #ed0799;
+  --Borders: #ed0799;
   --icon: #ffffff;
   --Button-pill-background: #000;
   --background: linear-gradient(135deg, #001010 100%, #00ffee 0%);
@@ -1309,7 +1309,7 @@ body {
 
   /* Match your dark + neon scheme but in a ChatGPT layout */
   background: rgba(12, 12, 12, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 1px solid var(--Borders);
   border-radius: 26px;
 
   /* Subtle depth + glow (keeps your vibe, ChatGPT spacing) */
