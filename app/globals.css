@@ -1521,3 +1521,25 @@ select:hover {
   display: block;              /* prevents svg baseline adding extra space */
   flex: 0 0 16px;
 }
+
+.provider-pill-row{
+  display:flex;
+  gap: 8px;
+}
+
+.provider-pill{
+  flex: 1 1 0;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid var(--Borders);
+  color: var(--Text);
+  text-shadow: 0 0 8px var(--Text-shadow);
+  box-shadow: 0 0 10px var(--Box-shadow);
+  cursor: pointer;
+}
+
+.provider-pill.active{
+  background: rgba(0,0,0,0.70);
+  box-shadow: 0 0 14px var(--Box-shadow);
+    }
