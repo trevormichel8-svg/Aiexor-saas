@@ -1,195 +1,103 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import type { ReactNode } from "react";
-import { SignedIn, SignedOut, SignInButton, useClerk } from "@clerk/nextjs";
-import { UserMenuButton } from "./UserMenuButton";
-import { CreditsPill } from "./CreditsPill";
-import { useProvider, type ProviderId } from "../providers/provider-context";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-function IconUser() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="7" r="4" />
-      <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
-    </svg>
-  );
+export type ProviderId = "openai" | "vertex";
+
+export type ModelId =
+  | "dall-e-2"
+  | "dall-e-3"
+  | "gpt-image-1.5"
+  | "imagen-4.0-fast-generate-001"
+  | "imagen-4.0-generate-001"
+  | "imagen-4.0-ultra-generate-001"
+  | "imagen-3.0-generate-002"
+  | "imagen-3.0-fast-generate-001";
+
+export type ModelOption = { id: ModelId; label: string };
+
+export const MODEL_OPTIONS: Record<ProviderId, ModelOption[]> = {
+  openai: [
+    { id: "dall-e-2", label: "DALL·E 2" },
+    { id: "dall-e-3", label: "DALL·E 3" },
+    { id: "gpt-image-1.5", label: "GPT-Image 1.5" },
+  ],
+  vertex: [
+    { id: "imagen-4.0-fast-generate-001", label: "Imagen 4 Fast" },
+    { id: "imagen-4.0-generate-001", label: "Imagen 4" },
+    { id: "imagen-4.0-ultra-generate-001", label: "Imagen 4 Ultra" },
+    { id: "imagen-3.0-generate-002", label: "Imagen 3 (002)" },
+    { id: "imagen-3.0-fast-generate-001", label: "Imagen 3 Fast" },
+  ],
+};
+
+const DEFAULT_MODEL: Record<ProviderId, ModelId> = {
+  openai: "dall-e-3",
+  vertex: "imagen-4.0-fast-generate-001",
+};
+
+type ProviderContextValue = {
+  provider: ProviderId;
+  setProvider: (provider: ProviderId) => void;
+
+  model: ModelId;
+  setModel: (model: ModelId) => void;
+
+  modelOptions: ModelOption[];
+};
+
+const ProviderContext = createContext<ProviderContextValue | null>(null);
+
+function readLS<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
 }
 
-function IconLogOut() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
-  );
+function writeLS(key: string, value: unknown) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // ignore
+  }
 }
 
-function IconMenu() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M4 6h16" />
-      <path d="M4 12h16" />
-      <path d="M4 18h16" />
-    </svg>
-  );
-}
+export function ProviderContextProvider({ children }: { children: React.ReactNode }) {
+  const [provider, setProviderState] = useState<ProviderId>(() => readLS("aiexor.provider", "openai"));
 
-function pageLabel(pathname: string) {
-  if (pathname.startsWith("/studio")) return "Studio";
-  if (pathname.startsWith("/billing")) return "Billing";
-  if (pathname.startsWith("/account")) return "Account";
-  return "Home";
-}
+  const [model, setModelState] = useState<ModelId>(() => {
+    const p = readLS<ProviderId>("aiexor.provider", "openai");
+    return readLS<ModelId>("aiexor.model", DEFAULT_MODEL[p]);
+  });
 
-export function MobileShell({ children }: { children: ReactNode }) {
-  const [open, setOpen] = useState(false);
-  const pathname = usePathname();
-  const clerk = useClerk();
+  const modelOptions = useMemo(() => MODEL_OPTIONS[provider], [provider]);
 
-  const { provider, setProvider, model, setModel, modelOptions } = useProvider();
+  const setProvider = (p: ProviderId) => setProviderState(p);
+  const setModel = (m: ModelId) => setModelState(m);
+
+  useEffect(() => writeLS("aiexor.provider", provider), [provider]);
+  useEffect(() => writeLS("aiexor.model", model), [model]);
 
   useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
+    const allowed = new Set(MODEL_OPTIONS[provider].map((o) => o.id));
+    if (!allowed.has(model)) setModelState(DEFAULT_MODEL[provider]);
+  }, [provider, model]);
 
-  useEffect(() => {
-    document.title = `AI.Exor • ${pageLabel(pathname)}`;
-  }, [pathname]);
-
-  return (
-    <div className="mobile-frame">
-      <div className="top-bar">
-        <div className="top-left">
-          <button
-            className="hamburger icon-button"
-            aria-label="Menu"
-            type="button"
-            onClick={() => setOpen(true)}
-          >
-            <IconMenu />
-          </button>
-
-          <div className="app-label-pill">
-            <div className="app-label">AI.Exor</div>
-          </div>
-        </div>
-
-        <div className="top-right">
-          <SignedIn>
-            <CreditsPill />
-          </SignedIn>
-
-          <SignedOut>
-            <SignInButton mode="modal">
-              <button className="credits-pill" aria-label="Sign in" type="button">
-                <IconUser />
-                <span>Sign in</span>
-              </button>
-            </SignInButton>
-          </SignedOut>
-
-          <SignedIn>
-            <UserMenuButton />
-          </SignedIn>
-        </div>
-      </div>
-
-      <main className="content">{children}</main>
-
-      <div id="sidebar" className={`sidebar ${open ? "open" : ""}`} aria-hidden={!open}>
-        <button
-          id="close-sidebar"
-          className="close-sidebar-btn"
-          aria-label="Close sidebar"
-          type="button"
-          onClick={() => setOpen(false)}
-        >
-          &times;
-        </button>
-
-        <div className="sidebar-content">
-          <h2>Menu</h2>
-
-          {/* Provider pills + model dropdown */}
-          <div className="sidebar-section" style={{ marginTop: "0.75rem" }}>
-            <div className="sidebar-label" style={{ fontSize: "0.85rem", opacity: 0.9, marginBottom: "0.35rem" }}>
-              Provider
-            </div>
-
-            <div className="provider-pill-row">
-              <button
-                type="button"
-                className={`provider-pill ${provider === "openai" ? "active" : ""}`}
-                onClick={() => setProvider("openai")}
-              >
-                OpenAI
-              </button>
-
-              <button
-                type="button"
-                className={`provider-pill ${provider === "vertex" ? "active" : ""}`}
-                onClick={() => setProvider("vertex")}
-              >
-                Google
-              </button>
-            </div>
-
-            <div className="sidebar-label" style={{ fontSize: "0.85rem", opacity: 0.9, margin: "0.75rem 0 0.35rem" }}>
-              Model
-            </div>
-
-            <select
-              id="model-select-sidebar"
-              className="provider-select"
-              aria-label="Image model"
-              value={model}
-              onChange={(e) => setModel(e.target.value as any)}
-            >
-              {modelOptions.map((opt) => (
-                <option key={opt.id} value={opt.id}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <SignedIn>
-            <div style={{ marginTop: "1rem" }}>
-              <button type="button" className="sidebar-link" onClick={() => clerk.signOut({ redirectUrl: "/" })}>
-                <IconLogOut />
-                <span>Sign out</span>
-              </button>
-            </div>
-          </SignedIn>
-        </div>
-      </div>
-    </div>
+  const value = useMemo(
+    () => ({ provider, setProvider, model, setModel, modelOptions }),
+    [provider, model, modelOptions]
   );
-        }
+
+  return <ProviderContext.Provider value={value}>{children}</ProviderContext.Provider>;
+}
+
+export function useProvider() {
+  const ctx = useContext(ProviderContext);
+  if (!ctx) throw new Error("useProvider must be used within ProviderContextProvider");
+  return ctx;
+  }
