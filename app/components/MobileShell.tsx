@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { SignedIn, SignedOut, SignInButton, useClerk } from "@clerk/nextjs";
 import { UserMenuButton } from "./UserMenuButton";
@@ -73,15 +73,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const clerk = useClerk();
 
-  const { provider, setProvider } = useProvider();
-
-  const providers: { id: ProviderId; label: string }[] = useMemo(
-    () => [
-      { id: "openai", label: "OpenAI" },
-      { id: "vertex", label: "Vertex AI" },
-    ],
-    []
-  );
+  const { provider, setProvider, model, setModel, modelOptions } = useProvider();
 
   useEffect(() => {
     setOpen(false);
@@ -95,20 +87,19 @@ export function MobileShell({ children }: { children: ReactNode }) {
     <div className="mobile-frame">
       <div className="top-bar">
         <div className="top-left">
-  <button
-    className="hamburger icon-button"
-    aria-label="Menu"
-    type="button"
-    onClick={() => setOpen(true)}
-  >
-    <IconMenu />
-  </button>
+          <button
+            className="hamburger icon-button"
+            aria-label="Menu"
+            type="button"
+            onClick={() => setOpen(true)}
+          >
+            <IconMenu />
+          </button>
 
           <div className="app-label-pill">
-    <div
-    className="app-label">AI.Exor</div>
-  </div>
-</div>
+            <div className="app-label">AI.Exor</div>
+          </div>
+        </div>
 
         <div className="top-right">
           <SignedIn>
@@ -146,39 +137,52 @@ export function MobileShell({ children }: { children: ReactNode }) {
         <div className="sidebar-content">
           <h2>Menu</h2>
 
-          {pathname.startsWith("/studio") ? (
-            <div className="sidebar-section" style={{ marginTop: "0.75rem" }}>
-              <div
-                className="sidebar-label"
-                style={{ fontSize: "0.85rem", opacity: 0.9, marginBottom: "0.35rem" }}
-              >
-                Provider
-              </div>
-              <select
-                id="provider-select-sidebar"
-                className="provider-select"
-                aria-label="Image model provider"
-                value={provider}
-                onChange={(e) => setProvider(e.target.value as ProviderId)}
-              >
-                {providers.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
+          {/* Provider pills + model dropdown */}
+          <div className="sidebar-section" style={{ marginTop: "0.75rem" }}>
+            <div className="sidebar-label" style={{ fontSize: "0.85rem", opacity: 0.9, marginBottom: "0.35rem" }}>
+              Provider
             </div>
-          ) : null}
 
-          {/* Pills removed: Studio / Billing / Account */}
+            <div className="provider-pill-row">
+              <button
+                type="button"
+                className={`provider-pill ${provider === "openai" ? "active" : ""}`}
+                onClick={() => setProvider("openai")}
+              >
+                OpenAI
+              </button>
+
+              <button
+                type="button"
+                className={`provider-pill ${provider === "vertex" ? "active" : ""}`}
+                onClick={() => setProvider("vertex")}
+              >
+                Google
+              </button>
+            </div>
+
+            <div className="sidebar-label" style={{ fontSize: "0.85rem", opacity: 0.9, margin: "0.75rem 0 0.35rem" }}>
+              Model
+            </div>
+
+            <select
+              id="model-select-sidebar"
+              className="provider-select"
+              aria-label="Image model"
+              value={model}
+              onChange={(e) => setModel(e.target.value as any)}
+            >
+              {modelOptions.map((opt) => (
+                <option key={opt.id} value={opt.id}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <SignedIn>
             <div style={{ marginTop: "1rem" }}>
-              <button
-                type="button"
-                className="sidebar-link"
-                onClick={() => clerk.signOut({ redirectUrl: "/" })}
-              >
+              <button type="button" className="sidebar-link" onClick={() => clerk.signOut({ redirectUrl: "/" })}>
                 <IconLogOut />
                 <span>Sign out</span>
               </button>
@@ -189,4 +193,3 @@ export function MobileShell({ children }: { children: ReactNode }) {
     </div>
   );
 }
-    
