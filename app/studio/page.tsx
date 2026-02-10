@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useProvider, type ProviderId } from "../providers/provider-context";
+import { useProvider, type ProviderId, type ModelId } from "../providers/provider-context";
 
 type OutputCard = {
   key: string;
@@ -28,7 +28,15 @@ function uid() {
 
 function IconTrash() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M3 6h18" />
       <path d="M8 6V4h8v2" />
       <path d="M6 6l1 16h10l1-16" />
@@ -40,16 +48,33 @@ function IconTrash() {
 
 function DownloadIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M12 5v12" />
       <polyline points="5 13 12 20 19 13" />
       <path d="M5 19h14" />
     </svg>
   );
 }
+
 function RemixIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <polyline points="23 4 23 10 17 10" />
       <polyline points="1 20 1 14 7 14" />
       <path d="M3.51 9a9 9 0 0 1 14.13-3.36l5.36 5.36" />
@@ -57,17 +82,35 @@ function RemixIcon() {
     </svg>
   );
 }
+
 function BrushIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M14 3l7 7-9 9H5v-7l9-9z" />
       <path d="M12 5l7 7" />
     </svg>
   );
 }
+
 function GenerateIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <rect x="3" y="3" width="18" height="14" rx="2" ry="2" />
       <circle cx="8.5" cy="8.5" r="1.5" />
       <polyline points="21 15 16 10 5 21" />
@@ -91,24 +134,100 @@ function LoadingLoop() {
 export default function StudioPage() {
   const styles = useMemo(
     () => [
-      "Abstract","Impressionism","Cubism","Futurism","Surrealism","Expressionism","Baroque","Renaissance",
-      "Pop Art","Art Deco","Minimalism","Modernism","Bauhaus","Dadaism","Conceptual","Street Art",
-      "Graffiti","Anime","Manga","Pixel Art","8-bit","Steampunk","Cyberpunk","Fantasy","Sci-Fi",
-      "Noir","Gothic","Nature","Wildlife","Portrait","Landscape","Seascape","Cityscape","Caricature",
-      "Watercolor","Oil Painting","Acrylic","Ink Drawing","Charcoal","Pastel","Geometric","Kawaii","Retro",
-      "Vintage","Psychedelic","Horror","Stencil","Indigenous","Coloring Book","Comic","Photo Realistic","Highly Detailed",
-      "Silhouette","Mosaic","Realistic Anime","Vibrant","Epic Origami","Abstract Curves","CGI","Black&White","3D Shading",
-      "Quilling","Candy","Double Exposure","Kintsugi","Glass","Movie Poster","Filigree","Fractal","Holographic","Golden Ratio",
-      "Iridescent","Topography","Silver Nitrate","Embossed","Embroidery","Smoke","Cloud","Chibi","Disney","Doodle","Airbrush",
-      "Glitchcore","Cinematic"
-      
+      "Abstract",
+      "Impressionism",
+      "Cubism",
+      "Futurism",
+      "Surrealism",
+      "Expressionism",
+      "Baroque",
+      "Renaissance",
+      "Pop Art",
+      "Art Deco",
+      "Minimalism",
+      "Modernism",
+      "Bauhaus",
+      "Dadaism",
+      "Conceptual",
+      "Street Art",
+      "Graffiti",
+      "Anime",
+      "Manga",
+      "Pixel Art",
+      "8-bit",
+      "Steampunk",
+      "Cyberpunk",
+      "Fantasy",
+      "Sci-Fi",
+      "Noir",
+      "Gothic",
+      "Nature",
+      "Wildlife",
+      "Portrait",
+      "Landscape",
+      "Seascape",
+      "Cityscape",
+      "Caricature",
+      "Watercolor",
+      "Oil Painting",
+      "Acrylic",
+      "Ink Drawing",
+      "Charcoal",
+      "Pastel",
+      "Geometric",
+      "Kawaii",
+      "Retro",
+      "Vintage",
+      "Psychedelic",
+      "Horror",
+      "Stencil",
+      "Indigenous",
+      "Coloring Book",
+      "Comic",
+      "Photo Realistic",
+      "Highly Detailed",
+      "Silhouette",
+      "Mosaic",
+      "Realistic Anime",
+      "Vibrant",
+      "Epic Origami",
+      "Abstract Curves",
+      "CGI",
+      "Black&White",
+      "3D Shading",
+      "Quilling",
+      "Candy",
+      "Double Exposure",
+      "Kintsugi",
+      "Glass",
+      "Movie Poster",
+      "Filigree",
+      "Fractal",
+      "Holographic",
+      "Golden Ratio",
+      "Iridescent",
+      "Topography",
+      "Silver Nitrate",
+      "Embossed",
+      "Embroidery",
+      "Smoke",
+      "Cloud",
+      "Chibi",
+      "Disney",
+      "Doodle",
+      "Airbrush",
+      "Glitchcore",
+      "Cinematic",
     ],
     []
   );
 
   const [tab, setTab] = useState("studio");
   const [prompt, setPrompt] = useState("");
-  const { provider } = useProvider();
+
+  // ✅ HERE: useProvider gives you provider + model
+  const { provider, model } = useProvider();
+
   const [styleOpen, setStyleOpen] = useState(false);
   const [cards, setCards] = useState<OutputCard[]>([]);
   const [busy, setBusy] = useState(false);
@@ -150,24 +269,24 @@ export default function StudioPage() {
     void fetchHistory();
   }, []);
 
-  async function callGenerate(p: string, prov: ProviderId) {
-    const res = await fetch("/api/generate", {
+  // ✅ NOW calls /api/image and sends provider + model
+  async function callGenerate(p: string, prov: ProviderId, mdl: ModelId) {
+    const res = await fetch("/api/image", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         prompt: p,
         provider: prov,
-        aspectRatio: "1:1",
-        sampleCount: 1,
-        personGeneration: "allow_none",
+        model: mdl,
       }),
     });
 
     const json = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(json?.error ?? `Request failed: ${res.status}`);
 
+    // Support either {images:[{b64}]} OR your older {images:[url]} format
     const images: string[] = Array.isArray(json?.images)
-      ? json.images
+      ? json.images.map((x: any) => (typeof x === "string" ? x : x?.b64 ? `data:image/png;base64,${x.b64}` : null)).filter(Boolean)
       : Array.isArray(json?.output)
         ? json.output
         : json?.image
@@ -178,21 +297,18 @@ export default function StudioPage() {
     return { images, generationId: json?.generationId as string | undefined };
   }
 
-  async function generateNew(p: string, prov: ProviderId) {
+  async function generateNew(p: string) {
     const clean = p.trim();
     if (!clean) return;
 
     setBusy(true);
 
     const key = uid();
-    setCards((prev) => [
-      { key, prompt: clean, provider: prov, status: "loading" },
-      ...prev,
-    ]);
+    setCards((prev) => [{ key, prompt: clean, provider, status: "loading" }, ...prev]);
     queueMicrotask(scrollToTop);
 
     try {
-      const { images, generationId } = await callGenerate(clean, prov);
+      const { images, generationId } = await callGenerate(clean, provider, model);
       const first = images[0]!;
       setCards((prev) =>
         prev.map((c) =>
@@ -218,9 +334,8 @@ export default function StudioPage() {
   async function remix(cardKey: string) {
     const card = cards.find((c) => c.key === cardKey);
     if (!card) return;
-
     setTab("studio");
-    void generateNew(card.prompt, provider);
+    void generateNew(card.prompt);
   }
 
   function download(url: string) {
@@ -265,21 +380,17 @@ export default function StudioPage() {
 
   return (
     <>
-
       {emptyVisible ? (
         <div id="empty-state" className="empty-state">
           <h1 className="first-message">Generate Your First Image</h1>
           <div className="preset-prompts">
-            {["Sunset over ocean", "Cute robot in forest", "Futuristic city skyline", "Dragon flying over mountains"].map((p) => (
-              <button
-                key={p}
-                type="button"
-                className="preset-btn"
-                onClick={() => void generateNew(p, provider)}
-              >
-                {p}
-              </button>
-            ))}
+            {["Sunset over ocean", "Cute robot in forest", "Futuristic city skyline", "Dragon flying over mountains"].map(
+              (p) => (
+                <button key={p} type="button" className="preset-btn" onClick={() => void generateNew(p)}>
+                  {p}
+                </button>
+              )
+            )}
           </div>
         </div>
       ) : null}
@@ -386,7 +497,7 @@ export default function StudioPage() {
         autoComplete="off"
         onSubmit={(e) => {
           e.preventDefault();
-          void generateNew(prompt, provider);
+          void generateNew(prompt);
         }}
       >
         <button
