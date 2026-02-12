@@ -1,0 +1,641 @@
+/*
+  AI.Exor — globals.css (RESET)
+  Goal: clean, minimal, readable, consistent.
+  - Universal theme vars
+  - Fixed prompt dock (.prompt-container + .prompt-bar)
+  - Sidebar (with provider pills + dropdown)
+  - Top bar (hamburger + app label + credits pill)
+  - Output grid + image cards
+  - Bottom sheet styles menu
+*/
+
+/* =====================
+   Theme
+===================== */
+:root {
+  --Text: #ffffff;
+  --Text-shadow: #1af00e;
+  --Borders: #1af00e;
+  --icon: #ffffff;
+  --Button-pill-background: #000;
+  --background: linear-gradient(135deg, #001010 100%, #00ffee 0%);
+  --Box-shadow: #ffffff;
+
+  --surface: rgba(10, 10, 10, 0.92);
+  --surface-2: rgba(0, 0, 0, 0.55);
+
+  --radius-pill: 999px;
+  --radius-card: 18px;
+  --radius-soft: 12px;
+
+  --pad: 16px;
+  --gap: 10px;
+
+  --rainbow-speed: 2.6s;
+  --rainbow-border: 2px;
+}
+
+/* =====================
+   Base
+===================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Apple Color Emoji",
+    "Segoe UI Emoji";
+  color: var(--Text);
+  background: var(--background);
+  background-color: var(--Button-pill-background);
+  overflow-x: hidden;
+}
+
+/* global border default */
+* {
+  border-color: var(--Borders);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* =====================
+   Animated rainbow border (optional)
+   Add .rainbow-border to any element
+===================== */
+.rainbow-border {
+  position: relative;
+  z-index: 0;
+  border: 1px solid var(--Borders); /* fallback */
+}
+
+.rainbow-border::before {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--rainbow-border));
+  border-radius: inherit;
+  padding: var(--rainbow-border);
+  z-index: -1;
+
+  background: conic-gradient(
+    from 0deg,
+    #ff004c,
+    #ff7a00,
+    #ffe600,
+    #00ff6a,
+    #00ffee,
+    #3b5bff,
+    #b700ff,
+    #ff004c
+  );
+  animation: rainbow-spin var(--rainbow-speed) linear infinite;
+
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+@keyframes rainbow-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rainbow-border::before {
+    animation: none;
+  }
+}
+
+/* =====================
+   App shell
+===================== */
+.mobile-frame {
+  width: 100%;
+  max-width: 520px;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+@media (max-width: 420px) {
+  .mobile-frame {
+    max-width: none;
+  }
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--pad);
+  gap: var(--gap);
+  z-index: 5;
+}
+
+.top-left,
+.top-right {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+}
+
+.app-label {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-pill);
+  padding: 0.36rem 0.78rem;
+  background: var(--surface);
+  border: 1px solid var(--Borders);
+  box-shadow: 0 0 10px var(--Box-shadow);
+  text-shadow: 0 0 10px var(--Text-shadow);
+  line-height: 1;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.credits-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: var(--radius-pill);
+  padding: 0.36rem 0.78rem;
+  background: var(--surface);
+  border: 1px solid var(--Borders);
+  box-shadow: 0 0 10px var(--Box-shadow);
+  text-shadow: 0 0 10px var(--Text-shadow);
+  line-height: 1;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.credits-pill svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  flex: 0 0 16px;
+}
+
+.icon-button {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--Borders);
+  color: var(--icon);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px var(--Box-shadow);
+  cursor: pointer;
+}
+
+.icon-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.hamburger.icon-button {
+  width: 34px;
+  height: 34px;
+  padding: 6px;
+  border-radius: var(--radius-pill);
+}
+
+.hamburger.icon-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.icon-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* =====================
+   Content / Output
+===================== */
+.content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  padding: 0 var(--pad);
+
+  /* space for fixed prompt dock */
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 140px);
+
+  scrollbar-width: none;
+}
+.content::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.output {
+  width: 100%;
+  padding: 0;
+}
+
+.output-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  padding: 0 0 18px;
+}
+
+@media (min-width: 640px) {
+  .output-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.image-container {
+  position: relative;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  border: 1px solid var(--Borders);
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 16px var(--Box-shadow);
+}
+
+.image-container img {
+  width: 100%;
+  height: auto;
+}
+
+.image-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 10px;
+}
+
+.image-remix-btn,
+.image-download-btn,
+.image-delete-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--Borders);
+  color: var(--Text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px var(--Box-shadow);
+  cursor: pointer;
+}
+
+.image-remix-btn svg,
+.image-download-btn svg,
+.image-delete-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.loading {
+  padding: 24px;
+  text-align: center;
+  text-shadow: 0 0 10px var(--Text-shadow);
+}
+
+/* =====================
+   Empty state
+===================== */
+.empty-state {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  width: min(520px, 88%);
+  text-align: center;
+  z-index: 1;
+}
+
+.first-message {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-shadow: 0 0 12px var(--Text-shadow);
+}
+
+.preset-prompts {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.preset-btn {
+  border-radius: var(--radius-pill);
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--Borders);
+  color: var(--Text);
+  box-shadow: 0 0 10px var(--Box-shadow);
+  cursor: pointer;
+}
+
+/* =====================
+   Sidebar
+===================== */
+.sidebar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 72%;
+  max-width: 300px;
+  padding: 18px;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  transform: translateX(-110%);
+  transition: transform 200ms ease;
+  z-index: 20;
+  border-right: 1px solid transparent;
+}
+
+.sidebar.open {
+  transform: translateX(0);
+  border-right-color: var(--Borders);
+  box-shadow: 0 0 18px var(--Box-shadow);
+}
+
+.close-sidebar-btn {
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background: #000;
+  border: 1px solid var(--Borders);
+  color: var(--Text);
+  cursor: pointer;
+  text-shadow: 0 0 10px var(--Text-shadow);
+}
+
+.sidebar-content h2 {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+  text-shadow: 0 0 10px var(--Text-shadow);
+}
+
+.sidebar-section {
+  margin-top: 14px;
+}
+
+.sidebar-label {
+  display: block;
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+.sidebar-link {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px;
+  border-radius: 12px;
+  background: #000;
+  border: 1px solid rgba(26, 240, 14, 0.25);
+  color: var(--Text);
+  cursor: pointer;
+}
+
+.sidebar-link:hover {
+  border-color: var(--Borders);
+  box-shadow: 0 0 12px var(--Box-shadow);
+}
+
+.sidebar-link svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Provider pills row + dropdown */
+.provider-pill-row {
+  display: flex;
+  gap: 10px;
+}
+
+.provider-pill {
+  flex: 1 1 0;
+  border-radius: var(--radius-pill);
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--Borders);
+  color: var(--Text);
+  text-shadow: 0 0 10px var(--Text-shadow);
+  box-shadow: 0 0 10px var(--Box-shadow);
+  cursor: pointer;
+}
+
+.provider-pill.active {
+  background: rgba(0, 0, 0, 0.75);
+  box-shadow: 0 0 14px var(--Box-shadow);
+}
+
+.provider-select {
+  width: 100%;
+  border-radius: 16px;
+  padding: 12px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--Borders);
+  color: var(--Text);
+  box-shadow: 0 0 10px var(--Box-shadow);
+  outline: none;
+}
+
+/* =====================
+   Style menu (bottom sheet)
+===================== */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+  z-index: 70;
+}
+
+.sheet-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.style-menu {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 76px;
+  max-height: 55vh;
+  transform: translateY(120%);
+  transition: transform 200ms ease;
+  padding: 10px;
+  z-index: 30;
+}
+
+.style-menu.open {
+  transform: translateY(0);
+}
+
+.style-menu-grid {
+  background: #000;
+  border: 1px solid var(--Borders);
+  box-shadow: 0 0 18px var(--Box-shadow);
+  border-radius: 18px;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  overflow: auto;
+  max-height: 46vh;
+}
+
+.style-pill {
+  border: 1px solid var(--Borders);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--Text);
+  padding: 12px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.9rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* =====================
+   Prompt dock (fixed)
+===================== */
+.prompt-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+
+  margin: 0 auto;
+  width: min(680px, 92%);
+
+  padding: 10px 14px calc(env(safe-area-inset-bottom, 20px) + 12px);
+}
+
+.prompt-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  background: #000;
+  border: 1px solid var(--Borders);
+  border-radius: 26px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  padding: 10px 12px;
+  box-shadow: 0 12px 44px var(--Box-shadow);
+}
+
+.plus-btn,
+.mic-btn,
+.send-btn,
+.generate-btn,
+.download-btn,
+.style-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--Borders);
+  color: var(--Text);
+  box-shadow: 0 0 14px var(--Box-shadow);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.prompt-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: #000;
+  border: 1px solid var(--Borders);
+  color: var(--Text);
+  border-radius: var(--radius-pill);
+  padding: 10px 12px;
+  font-size: 16px;
+  line-height: 1.35;
+  min-height: 22px;
+  max-height: 180px;
+  overflow-y: auto;
+  resize: none;
+  outline: none;
+}
+
+.prompt-input::placeholder {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+/* =====================
+   Responsive tweaks
+===================== */
+@media (min-width: 640px) {
+  .app-label,
+  .credits-pill {
+    font-size: 1.25rem;
+  }
+}
+
+
+/* Make Clerk user button circular (signed-in avatar/button) */
+.cl-userButtonTrigger,
+.cl-userButtonBox,
+.cl-userButtonAvatarBox,
+.cl-avatarBox {
+  border-radius: var(--radius-pill) !important;
+  overflow: hidden;
+}
+
+
+/* Force Sign In button text + icon to pure white */
+.credits-pill,
+.credits-pill span,
+.credits-pill svg,
+.credits-pill svg path {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  fill: #ffffff !important;
+}
