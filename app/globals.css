@@ -15,12 +15,12 @@
 ===================== */
 :root{
   --Text:#ffffff;
-  --Text-shadow:#1af00e;
-  --Borders:#1af00e;
+  --Text-shadow:#00ffff;
+  --Borders:#ffffff;
   --icon:#ffffff;
   --Button-pill-background:#000;
   --background: linear-gradient(135deg, #001010 100%, #00ffee 0%);
-  --Box-shadow:#ffffff;
+  --Box-shadow:#00ffff;
 
   --surface: rgba(0,0,0,0.88);
   --surface-2: rgba(0,0,0,0.62);
