@@ -1,0 +1,573 @@
+/*
+  AI.Exor — globals.css (NEW)
+  Clean, minimal, consistent.
+  Includes:
+  - Universal neon theme
+  - Top bar (hamburger circle, app label pill, credits pill, sign-in white)
+  - Sidebar (provider pills + model select)
+  - Output grid + image cards
+  - Style menu (fixed, above prompt)
+  - Fixed prompt dock (.prompt-container + .prompt-bar) with BLACK backgrounds
+*/
+
+/* =====================
+   Theme
+===================== */
+:root{
+  --Text:#ffffff;
+  --Text-shadow:#1af00e;
+  --Borders:#1af00e;
+  --icon:#ffffff;
+  --Button-pill-background:#000;
+  --background: linear-gradient(135deg, #001010 100%, #00ffee 0%);
+  --Box-shadow:#ffffff;
+
+  --surface: rgba(0,0,0,0.88);
+  --surface-2: rgba(0,0,0,0.62);
+
+  /* Consistent sizing system */
+  --radius-pill: 999px;
+  --radius-card: 18px;
+
+  --pad: 16px;
+  --gap: 10px;
+
+  --pill-py: 0.36rem;
+  --pill-px: 0.78rem;
+  --pill-font: 1.05rem;
+  --pill-line: 1;
+
+  --btn-size: 44px;
+  --btn-icon: 20px;
+
+  --btn-sm-size: 34px;
+  --btn-sm-icon: 16px;
+
+  --chip-size: 42px;
+  --chip-icon: 20px;
+
+  --prompt-btn-size: 40px;
+  --prompt-btn-icon: 20px;
+
+  --select-py: 12px;
+  --select-px: 12px;
+
+  --shadow-soft: 0 0 10px var(--Box-shadow);
+
+  --tap-min: 44px;
+}
+
+/* =====================
+   Base
+===================== */
+*,
+*::before,
+*::after{ box-sizing:border-box; }
+
+html,body{ height:100%; }
+
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--Text);
+  background: var(--background);
+  background-color: var(--Button-pill-background);
+  overflow-x:hidden;
+}
+
+*{ border-color: var(--Borders); }
+
+a{ color:inherit; text-decoration:none; }
+
+img{ display:block; max-width:100%; height:auto; }
+
+button,input,textarea,select{ font:inherit; }
+
+/* =====================
+   Shell
+===================== */
+.mobile-frame{
+  width:100%;
+  max-width: 520px;
+  height:100vh;
+  height:100dvh;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  position:relative;
+}
+
+.top-bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: var(--pad);
+  gap: var(--gap);
+  z-index: 10;
+}
+
+.top-left,
+.top-right{
+  display:flex;
+  align-items:center;
+  gap: var(--gap);
+}
+
+/* =====================
+   Pills + Buttons (Top)
+===================== */
+/* =====================
+   Consistent sizing for pills/buttons/icons
+===================== */
+
+/* All pill-like elements */
+.app-label,
+.credits-pill,
+.provider-pill {
+  padding: var(--pill-py) var(--pill-px);
+  font-size: var(--pill-font);
+  line-height: var(--pill-line);
+  border-radius: var(--radius-pill);
+}
+
+/* All circular icon buttons */
+.icon-button,
+.image-remix-btn,
+.image-download-btn,
+.image-delete-btn {
+  width: var(--btn-size);
+  height: var(--btn-size);
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border-radius: var(--radius-pill);
+  padding: 0;
+}
+
+/* Icons inside circular buttons */
+.icon-button svg,
+.image-remix-btn svg,
+.image-download-btn svg,
+.image-delete-btn svg {
+  width: var(--btn-icon);
+  height: var(--btn-icon);
+}
+
+/* Small circular buttons (hamburger) */
+.hamburger.icon-button{
+  width: var(--btn-sm-size);
+  height: var(--btn-sm-size);
+  min-width: var(--btn-sm-size);
+  min-height: var(--btn-sm-size);
+  padding: 0;
+}
+
+.hamburger.icon-button svg{
+  width: var(--btn-sm-icon);
+  height: var(--btn-sm-icon);
+}
+
+/* Prompt row buttons */
+.plus-btn,
+.mic-btn,
+.send-btn,
+.generate-btn,
+.download-btn,
+.style-btn{
+  width: var(--prompt-btn-size);
+  height: var(--prompt-btn-size);
+  min-width: var(--prompt-btn-size);
+  min-height: var(--prompt-btn-size);
+  padding: 0;
+  border-radius: var(--radius-pill);
+}
+
+.plus-btn svg,
+.mic-btn svg,
+.send-btn svg,
+.generate-btn svg,
+.download-btn svg,
+.style-btn svg{
+  width: var(--prompt-btn-icon);
+  height: var(--prompt-btn-icon);
+}
+
+/* Form controls */
+.provider-select{
+  padding: var(--select-py) var(--select-px);
+  border-radius: 16px;
+}
+
+
+.icon-button{
+  width:44px;
+  height:44px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border:1px solid var(--Borders);
+  color: var(--icon);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: var(--shadow-soft);
+  cursor:pointer;
+}
+
+.icon-button svg{ width:20px; height:20px; }
+
+.icon-button:disabled{
+  opacity:0.5;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+
+.hamburger.icon-button{
+  width:34px;
+  height:34px;
+  padding:6px;
+  border-radius: var(--radius-pill); /* circle */
+}
+
+.hamburger.icon-button svg{ width:16px; height:16px; }
+
+.app-label{
+  display:inline-flex;
+  align-items:center;
+  border-radius: var(--radius-pill);
+  padding: 0.36rem 0.78rem;
+  background: var(--surface);
+  border:1px solid var(--Borders);
+  box-shadow: var(--shadow-soft);
+  text-shadow: 0 0 10px var(--Text-shadow);
+  line-height:1;
+  font-size:1.05rem;
+  white-space:nowrap;
+}
+
+.credits-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:0.45rem;
+  border-radius: var(--radius-pill);
+  padding: 0.36rem 0.78rem;
+  background: var(--surface);
+  border:1px solid var(--Borders);
+  box-shadow: var(--shadow-soft);
+  text-shadow: 0 0 10px var(--Text-shadow);
+  line-height:1;
+  font-size:1.05rem;
+  white-space:nowrap;
+}
+
+/* Force Sign In text + icon white */
+.credits-pill,
+.credits-pill span,
+.credits-pill svg,
+.credits-pill svg path{
+  color:#fff !important;
+  stroke:#fff !important;
+  fill:#fff !important;
+}
+
+.credits-pill svg{
+  width:16px;
+  height:16px;
+  display:block;
+  flex:0 0 16px;
+}
+
+/* Clerk signed-in button/avatar circle */
+.cl-userButtonTrigger,
+.cl-userButtonBox,
+.cl-userButtonAvatarBox,
+.cl-avatarBox{
+  border-radius: var(--radius-pill) !important;
+  overflow:hidden;
+}
+
+/* =====================
+   Content / Output
+===================== */
+.content{
+  flex:1 1 auto;
+  overflow-y:auto;
+  overflow-x:hidden;
+  position:relative;
+  padding: 0 var(--pad);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 150px);
+  scrollbar-width:none;
+}
+.content::-webkit-scrollbar{ width:0; height:0; }
+
+.output{ width:100%; padding:0; }
+
+.output-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  padding: 0 0 18px;
+}
+
+@media (min-width: 640px){
+  .output-grid{ grid-template-columns: 1fr 1fr; }
+  .app-label,.credits-pill{ font-size:1.25rem; }
+}
+
+.image-container{
+  position:relative;
+  border-radius: var(--radius-card);
+  overflow:hidden;
+  border:1px solid var(--Borders);
+  background: rgba(0,0,0,0.35);
+  box-shadow: 0 0 16px var(--Box-shadow);
+}
+
+.image-controls{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  padding:10px;
+}
+
+.image-remix-btn,
+.image-download-btn,
+.image-delete-btn{
+  width:42px;
+  height:42px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border:1px solid var(--Borders);
+  color: var(--Text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: var(--shadow-soft);
+  cursor:pointer;
+}
+
+.image-remix-btn svg,
+.image-download-btn svg,
+.image-delete-btn svg{
+  width:20px;
+  height:20px;
+}
+
+.loading{
+  padding:24px;
+  text-align:center;
+  text-shadow: 0 0 10px var(--Text-shadow);
+}
+
+/* =====================
+   Sidebar
+===================== */
+.sidebar{
+  position:absolute;
+  inset:0 auto 0 0;
+  width:72%;
+  max-width:300px;
+  padding:18px;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transform: translateX(-110%);
+  transition: transform 200ms ease;
+  z-index: 30;
+  border-right: 1px solid transparent;
+}
+
+.sidebar.open{
+  transform: translateX(0);
+  border-right-color: var(--Borders);
+  box-shadow: 0 0 18px var(--Box-shadow);
+}
+
+.close-sidebar-btn{
+  position:absolute;
+  right:12px;
+  top:10px;
+  width:40px;
+  height:40px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border:1px solid var(--Borders);
+  color: var(--Text);
+  cursor:pointer;
+  text-shadow: 0 0 10px var(--Text-shadow);
+}
+
+.sidebar-content h2{
+  margin:0 0 10px;
+  font-size:1.1rem;
+  text-shadow: 0 0 10px var(--Text-shadow);
+}
+
+.sidebar-section{ margin-top:14px; }
+
+.sidebar-label{
+  display:block;
+  font-size:0.85rem;
+  opacity:0.9;
+  margin-bottom:8px;
+}
+
+.sidebar-link{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 12px;
+  border-radius:12px;
+  background: transparent;
+  border:1px solid rgba(26,240,14,0.25);
+  color: var(--Text);
+  cursor:pointer;
+}
+
+.sidebar-link:hover{
+  border-color: var(--Borders);
+  box-shadow: 0 0 12px var(--Box-shadow);
+}
+
+.sidebar-link svg{ width:18px; height:18px; }
+
+.provider-pill-row{
+  display:flex;
+  gap:10px;
+}
+
+.provider-pill{
+  flex:1 1 0;
+  border-radius: var(--radius-pill);
+  padding:10px 12px;
+  background: var(--surface-2);
+  border:1px solid var(--Borders);
+  color: var(--Text);
+  text-shadow: 0 0 10px var(--Text-shadow);
+  box-shadow: var(--shadow-soft);
+  cursor:pointer;
+}
+
+.provider-pill.active{
+  background: rgba(0,0,0,0.82);
+  box-shadow: 0 0 14px var(--Box-shadow);
+}
+
+.provider-select{
+  width:100%;
+  border-radius:16px;
+  padding:12px 12px;
+  background: var(--surface-2);
+  border:1px solid var(--Borders);
+  color: var(--Text);
+  box-shadow: var(--shadow-soft);
+  outline:none;
+}
+
+/* =====================
+   Style menu (fixed above prompt)
+===================== */
+.style-menu{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:86px;
+  max-height:55vh;
+  transform: translateY(120%);
+  transition: transform 200ms ease;
+  padding:10px;
+  z-index: 80;
+}
+
+.style-menu.open{ transform: translateY(0); }
+
+.style-menu-grid{
+  width: min(680px, 92%);
+  margin: 0 auto;
+  background: rgba(0,0,0,0.82);
+  border:1px solid var(--Borders);
+  box-shadow: 0 0 18px var(--Box-shadow);
+  border-radius: 18px;
+  padding: 10px;
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  overflow:auto;
+  max-height: 46vh;
+}
+
+.style-pill{
+  border:1px solid var(--Borders);
+  background: rgba(255,255,255,0.04);
+  color: var(--Text);
+  padding:12px 10px;
+  border-radius: var(--radius-pill);
+  font-size:0.9rem;
+  text-align:center;
+  cursor:pointer;
+}
+
+/* =====================
+   Prompt dock (fixed, BLACK)
+===================== */
+.prompt-container{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index: 90;
+  margin:0 auto;
+  width: min(680px, 92%);
+  padding: 10px 14px calc(env(safe-area-inset-bottom, 20px) + 12px);
+}
+
+.prompt-bar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:#000;
+  border:1px solid var(--Borders);
+  border-radius:26px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 10px 12px;
+  box-shadow: 0 12px 44px var(--Box-shadow);
+}
+
+.plus-btn,
+.mic-btn,
+.send-btn,
+.generate-btn,
+.download-btn,
+.style-btn{
+  width:40px;
+  height:40px;
+  border-radius: var(--radius-pill);
+  background:#000;
+  border:1px solid var(--Borders);
+  color: var(--Text);
+  box-shadow: 0 0 14px var(--Box-shadow);
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.prompt-input{
+  flex:1 1 auto;
+  min-width:0;
+  background:#000;
+  border:1px solid var(--Borders);
+  color: var(--Text);
+  border-radius: var(--radius-pill);
+  padding: 10px 12px;
+  font-size:16px;
+  line-height:1.35;
+  min-height:22px;
+  max-height:180px;
+  overflow-y:auto;
+  resize:none;
+  outline:none;
+}
+
+.prompt-input::placeholder{ color: rgba(255,255,255,0.42); }
