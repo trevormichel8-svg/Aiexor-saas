@@ -571,3 +571,126 @@ button,input,textarea,select{ font:inherit; }
 }
 
 .prompt-input::placeholder{ color: rgba(255,255,255,0.42); }
+
+
+/* =====================
+   User avatar — force circle + size
+===================== */
+
+/* Outer trigger */
+.cl-userButtonTrigger{
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+}
+
+/* Avatar wrapper layers */
+.cl-userButtonBox,
+.cl-userButtonAvatarBox,
+.cl-avatarBox{
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+}
+
+/* Actual avatar image */
+.cl-avatarImage{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+  }
+
+/* =====================
+   User menu icon sizing
+===================== */
+
+/* Menu container */
+.cl-userButtonPopoverCard svg,
+.cl-userButtonPopoverCard img{
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* Menu rows */
+.cl-userButtonPopoverActionButton{
+  padding: 10px 12px !important;
+  font-size: 0.95rem !important;
+  gap: 10px !important;
+}
+
+/* Text alignment */
+.cl-userButtonPopoverActionButton span{
+  line-height: 1.2;
+  }
+
+  .cl-userButtonTrigger{
+  background: var(--surface);
+  border: 1px solid var(--Borders);
+  box-shadow: var(--shadow-soft);
+  }
+/* =====================
+   Clerk user menu → pill style rows
+===================== */
+
+/* The popover card itself (optional polish) */
+.cl-userButtonPopoverCard{
+  background: rgba(0,0,0,0.88) !important;
+  border: 1px solid var(--Borders) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 0 18px var(--Box-shadow) !important;
+  padding: 12px !important;
+}
+
+/* Make each action row look like a pill button */
+.cl-userButtonPopoverActionButton{
+  width: 100% !important;
+  border-radius: var(--radius-pill) !important;
+  border: 1px solid var(--Borders) !important;
+  background: #000 !important;
+  color: var(--Text) !important;
+
+  padding: 10px 12px !important;
+  margin: 8px 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+
+  box-shadow: var(--shadow-soft) !important;
+  text-shadow: 0 0 10px var(--Text-shadow);
+}
+
+/* Hover / active */
+.cl-userButtonPopoverActionButton:hover{
+  box-shadow: 0 0 14px var(--Box-shadow) !important;
+}
+
+/* Icon sizing inside rows */
+.cl-userButtonPopoverActionButton svg{
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* Keep icon strokes white */
+.cl-userButtonPopoverActionButton svg,
+.cl-userButtonPopoverActionButton svg path{
+  color: #fff !important;
+  stroke: #fff !important;
+  fill: none !important;
+}
+
+/* Label text */
+.cl-userButtonPopoverActionButton span{
+  font-size: 0.95rem !important;
+  line-height: 1.1 !important;
+}
+
+/* Remove any default separators/lines if Clerk adds them */
+.cl-userButtonPopoverActions,
+.cl-userButtonPopoverActions *{
+  border-color: transparent !important;
+  }
