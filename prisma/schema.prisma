@@ -42,3 +42,12 @@ model Generation {
 
   @@index([userId, createdAt])
 }
+
+model GalleryItem {
+  id        String   @id @default(cuid())
+  prompt    String
+  image     String
+  provider  String
+  model     String?
+  createdAt DateTime @default(now())
+}
