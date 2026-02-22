@@ -358,6 +358,25 @@ button,input,textarea,select{ font:inherit; }
   text-shadow: 0 0 10px var(--Text-shadow);
 }
 
+.image-publish-btn{
+  width:42px;
+  height:42px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border:1px solid var(--Borders);
+  color: var(--Text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: 0 0 10px var(--Box-shadow);
+  cursor:pointer;
+}
+
+.image-publish-btn svg{
+  width:20px;
+  height:20px;
+}
+
 /* =====================
    Sidebar
 ===================== */
