@@ -1,0 +1,41 @@
+name: Prisma Migrate Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "prisma/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/prisma-migrate-deploy.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: prisma-migrate-main
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Prisma generate
+        run: npx prisma generate
+
+      - name: Prisma migrate deploy (PROD SAFE)
+        run: npx prisma migrate deploy
