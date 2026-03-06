@@ -13,10 +13,10 @@ model User {
   stripeCustomerId   String?      @unique
   subscriptionStatus String       @default("none")
   credits            Int          @default(0)
-  usageLogs          UsageLog[]
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
   generations        Generation[]
+  usageLogs          UsageLog[]
 }
 
 model UsageLog {
@@ -24,8 +24,7 @@ model UsageLog {
   userId    String
   prompt    String
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
 }
@@ -35,10 +34,9 @@ model Generation {
   userId    String
   prompt    String
   provider  String
-  image     String   @db.Text
+  image     String
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
 }
@@ -50,4 +48,18 @@ model GalleryItem {
   provider  String
   model     String?
   createdAt DateTime @default(now())
+
+  likes     GalleryLike[]
+}
+
+model GalleryLike {
+  id            String     @id @default(cuid())
+  userId        String
+  galleryItemId String
+  createdAt     DateTime   @default(now())
+
+  item          GalleryItem @relation(fields: [galleryItemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, galleryItemId])
+  @@index([galleryItemId])
 }

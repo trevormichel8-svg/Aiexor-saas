@@ -26,83 +26,6 @@ function uid() {
   return `${Date.now()}_${Math.random().toString(16).slice(2)}`;
 }
 
-function IconTrash() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M3 6h18" />
-      <path d="M8 6V4h8v2" />
-      <path d="M6 6l1 16h10l1-16" />
-      <path d="M10 11v7" />
-      <path d="M14 11v7" />
-    </svg>
-  );
-}
-
-function DownloadIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M12 5v12" />
-      <polyline points="5 13 12 20 19 13" />
-      <path d="M5 19h14" />
-    </svg>
-  );
-}
-
-
-function PublishIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M12 16V4" />
-      <polyline points="7 9 12 4 17 9" />
-      <path d="M4 20h16" />
-    </svg>
-  );
-}
-
-
-function RemixIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <polyline points="23 4 23 10 17 10" />
-      <polyline points="1 20 1 14 7 14" />
-      <path d="M3.51 9a9 9 0 0 1 14.13-3.36l5.36 5.36" />
-      <path d="M20.49 15a9 9 0 0 1-14.13 3.36L1 13" />
-    </svg>
-  );
-}
-
 function BrushIcon() {
   return (
     <svg
@@ -148,6 +71,47 @@ function LoadingLoop() {
         <span />
       </div>
     </div>
+  );
+}
+
+function ClickIcon({
+  icon,
+  label,
+  onClick,
+  disabled,
+}: {
+  icon: string;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <span
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      aria-label={label}
+      aria-disabled={disabled ? "true" : "false"}
+      title={label}
+      onClick={() => {
+        if (!disabled) onClick();
+      }}
+      onKeyDown={(e) => {
+        if (disabled) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      style={{
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.45 : 1,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <i className={`bi ${icon}`} aria-hidden="true" />
+    </span>
   );
 }
 
@@ -244,8 +208,12 @@ export default function StudioPage() {
 
   const [tab, setTab] = useState("studio");
   const [prompt, setPrompt] = useState("");
+  const [aspectRatio, setAspectRatio] = useState<"1:1" | "16:9" | "9:16" | "4:3" | "3:4">("1:1");
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editCardKey, setEditCardKey] = useState<string | null>(null);
 
-  // ✅ HERE: useProvider gives you provider + model
+
   const { provider, model } = useProvider();
 
   const [styleOpen, setStyleOpen] = useState(false);
@@ -289,35 +257,87 @@ export default function StudioPage() {
     void fetchHistory();
   }, []);
 
-  // ✅ NOW calls /api/image and sends provider + model
   async function callGenerate(p: string, prov: ProviderId, mdl: ModelId) {
     const res = await fetch("/api/image", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        prompt: p,
-        provider: prov,
-        model: mdl,
-      }),
+      body: JSON.stringify({ prompt: p, provider: prov, model: mdl }),
     });
 
     const json = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(json?.error ?? `Request failed: ${res.status}`);
 
-    // Support either {images:[{b64}]} OR your older {images:[url]} format
     const images: string[] = Array.isArray(json?.images)
-      ? json.images.map((x: any) => (typeof x === "string" ? x : x?.b64 ? `data:image/png;base64,${x.b64}` : null)).filter(Boolean)
+      ? json.images
+          .map((x: any) =>
+            typeof x === "string" ? x : x?.b64 ? `data:image/png;base64,${x.b64}` : null
+          )
+          .filter(Boolean)
       : Array.isArray(json?.output)
-        ? json.output
-        : json?.image
-          ? [json.image]
-          : [];
+      ? json.output
+      : json?.image
+      ? [json.image]
+      : [];
 
     if (images.length === 0) throw new Error("No image returned");
     return { images, generationId: json?.generationId as string | undefined };
   }
 
-  async function generateNew(p: string) {
+  
+  async function variations(cardKey: string) {
+    const card = cards.find((c) => c.key === cardKey);
+    if (!card) return;
+
+    setBusy(true);
+    try {
+      const res = await fetch("/api/image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: card.prompt,
+          provider: card.provider,
+          model,
+          aspectRatio,
+          n: 4,
+        }),
+      });
+
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.error ?? `Request failed: ${res.status}`);
+
+      const images: string[] = Array.isArray(json?.images)
+        ? json.images
+            .map((x: any) => (typeof x === "string" ? x : x?.b64 ? `data:image/png;base64,${x.b64}` : null))
+            .filter(Boolean)
+        : [];
+
+      if (!images.length) throw new Error("No images returned");
+
+      const now = Date.now();
+      setCards((prev) => [
+        ...images.map((url, idx) => ({
+          key: `${now}_${idx}_${Math.random().toString(16).slice(2)}`,
+          prompt: card.prompt,
+          provider: card.provider,
+          imageUrl: url,
+          status: "ready" as const,
+        })),
+        ...prev,
+      ]);
+      queueMicrotask(scrollToTop);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function openEdit(cardKey: string) {
+    setEditCardKey(cardKey);
+    setEditOpen(true);
+  }
+
+async function generateNew(p: string) {
     const clean = p.trim();
     if (!clean) return;
 
@@ -367,23 +387,25 @@ export default function StudioPage() {
     document.body.removeChild(a);
   }
 
+  async function publishToGallery(card: OutputCard) {
+    if (!card.imageUrl) return;
 
+    const res = await fetch("/api/gallery", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        prompt: card.prompt,
+        imageUrl: card.imageUrl,
+        provider: card.provider,
+        model,
+      }),
+    });
 
-async function publishToGallery(card: OutputCard) {
-  if (!card.imageUrl) return;
-
-  await fetch("/api/gallery", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      prompt: card.prompt,
-      image: card.imageUrl,
-      provider,
-      model,
-    }),
-  });
-}
-
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data?.error ?? "Publish failed");
+    }
+  }
 
   async function deleteOne(card: OutputCard) {
     if (!card.historyId) return;
@@ -400,24 +422,47 @@ async function publishToGallery(card: OutputCard) {
     }
   }
 
-  async function clearAll() {
-    setHistoryBusy(true);
-    try {
-      await fetch("/api/history", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      });
-      setCards([]);
-    } finally {
-      setHistoryBusy(false);
-    }
-  }
-
   const emptyVisible = cards.length === 0 && tab === "studio";
 
   return (
     <>
+      <div className="studio-top">
+        <div className="ratio-row">
+          {["1:1", "16:9", "9:16", "4:3", "3:4"].map((r) => (
+            <button key={r} type="button" className={`pill-btn ${aspectRatio === r ? "active" : ""}`} onClick={() => setAspectRatio(r as any)}>
+              {r}
+            </button>
+          ))}
+          <button type="button" className="pill-btn" onClick={() => setCompareOpen(true)}>
+            <i className="bi bi-grid-3x3-gap" aria-hidden="true"></i><span>Compare</span>
+          </button>
+        </div>
+
+        <div className="preset-row">
+          {[
+            { label: "Anime", add: "anime, clean line art, vibrant" },
+            { label: "Cyberpunk", add: "cyberpunk, neon, rainy, cinematic" },
+            { label: "Oil", add: "oil painting, textured brush strokes" },
+            { label: "Photo", add: "photorealistic, DSLR, shallow depth of field" },
+            { label: "3D", add: "3d render, octane render, global illumination" },
+          ].map((p) => (
+            <button
+              key={p.label}
+              type="button"
+              className="pill-btn"
+              onClick={() =>
+                setPrompt((cur) => {
+                  const t = cur.trim();
+                  return t ? `${t}, ${p.add}` : p.add;
+                })
+              }
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {emptyVisible ? (
         <div id="empty-state" className="empty-state">
           <h1 className="first-message">Generate Your First Image</h1>
@@ -464,48 +509,36 @@ async function publishToGallery(card: OutputCard) {
                 </div>
               ) : null}
 
-              <div className="image-controls">
-                <button
-                  type="button"
-                  className="image-remix-btn"
-                  aria-label="Remix image"
+              {/* Bootstrap Icons — no buttons, icons remain clickable */}
+              <div className="image-controls" style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+                <ClickIcon
+                  icon="bi-arrow-repeat"
+                  label="Remix image"
                   onClick={() => remix(c.key)}
                   disabled={c.status === "loading"}
-                >
-                  <RemixIcon />
-                </button>
+                />
 
-                <button
-                  type="button"
-                  className="image-download-btn"
-                  aria-label="Download image"
+                <ClickIcon
+                  icon="bi-download"
+                  label="Download image"
                   onClick={() => c.imageUrl && download(c.imageUrl)}
                   disabled={!c.imageUrl || c.status === "loading"}
-                >
-                  <DownloadIcon />
-                </button>
+                />
 
-
-<button
-  type="button"
-  className="image-publish-btn"
-  aria-label="Publish to gallery"
-  onClick={() => void publishToGallery(c)}
-  disabled={!c.imageUrl || c.status === "loading"}
->
-  <PublishIcon />
-</button>
+                <ClickIcon
+                  icon="bi-upload"
+                  label="Publish to gallery"
+                  onClick={() => void publishToGallery(c)}
+                  disabled={!c.imageUrl || c.status === "loading"}
+                />
 
                 {tab === "history" ? (
-                  <button
-                    type="button"
-                    className="image-delete-btn"
-                    aria-label="Delete from history"
+                  <ClickIcon
+                    icon="bi-trash"
+                    label="Delete from history"
                     onClick={() => void deleteOne(c)}
                     disabled={historyBusy || !c.historyId}
-                  >
-                    <IconTrash />
-                  </button>
+                  />
                 ) : null}
               </div>
             </div>
@@ -556,7 +589,7 @@ async function publishToGallery(card: OutputCard) {
           aria-label="Choose style"
           onClick={() => setStyleOpen((v) => !v)}
         >
-          <BrushIcon />
+          <i className="bi bi-brush" aria-hidden="true" />
         </button>
 
         <textarea
@@ -575,9 +608,51 @@ async function publishToGallery(card: OutputCard) {
           aria-label="Generate image"
           disabled={busy}
         >
-          <GenerateIcon />
+          <i className="bi bi-stars" aria-hidden="true" />
         </button>
       </form>
+
+      {compareOpen ? (
+        <div className="modal" role="dialog" aria-modal="true">
+          <div className="modal-inner">
+            <div className="modal-head">
+              <div className="modal-title">Model Comparison</div>
+              <button type="button" className="icon-button" aria-label="Close" onClick={() => setCompareOpen(false)}>
+                <i className="bi bi-x-lg" aria-hidden="true" />
+              </button>
+            </div>
+            <div className="modal-body">
+              <p className="loading">
+                Scaffold only (won't break builds). Next: choose multiple providers/models and call /api/image.
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {editOpen ? (
+        <div className="modal" role="dialog" aria-modal="true">
+          <div className="modal-inner">
+            <div className="modal-head">
+              <div className="modal-title">Edit (Inpaint)</div>
+              <button type="button" className="icon-button" aria-label="Close" onClick={() => setEditOpen(false)}>
+                <i className="bi bi-x-lg" aria-hidden="true" />
+              </button>
+            </div>
+            <div className="modal-body">
+              <p className="loading">
+                Scaffold only: add a mask canvas (fabric.js/konva) and POST baseImage+mask+prompt to /api/image.
+              </p>
+              {editCardKey ? (
+                (() => {
+                  const card = cards.find((x) => x.key === editCardKey);
+                  return card?.imageUrl ? <img src={card.imageUrl} alt="Edit base" style={{ width: "100%", borderRadius: 16 }} /> : null;
+                })()
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

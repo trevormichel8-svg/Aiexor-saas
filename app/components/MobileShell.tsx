@@ -6,65 +6,13 @@ import type { ReactNode } from "react";
 import { SignedIn, SignedOut, SignInButton, useClerk } from "@clerk/nextjs";
 import { UserMenuButton } from "./UserMenuButton";
 import { CreditsPill } from "./CreditsPill";
-import { useProvider, type ProviderId } from "../providers/provider-context";
-
-function IconUser() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="7" r="4" />
-      <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
-    </svg>
-  );
-}
-
-function IconLogOut() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
-  );
-}
-
-function IconMenu() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M4 6h16" />
-      <path d="M4 12h16" />
-      <path d="M4 18h16" />
-    </svg>
-  );
-}
+import { useProvider } from "../providers/provider-context";
 
 function pageLabel(pathname: string) {
   if (pathname.startsWith("/studio")) return "Studio";
   if (pathname.startsWith("/billing")) return "Billing";
   if (pathname.startsWith("/account")) return "Account";
+  if (pathname.startsWith("/gallery")) return "Gallery";
   return "Home";
 }
 
@@ -93,7 +41,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
             type="button"
             onClick={() => setOpen(true)}
           >
-            <IconMenu />
+            <i className="bi bi-list" aria-hidden="true" />
           </button>
 
           <div className="app-label-pill">
@@ -109,7 +57,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
           <SignedOut>
             <SignInButton mode="modal">
               <button className="credits-pill" aria-label="Sign in" type="button">
-                <IconUser />
+                <i className="bi bi-person-circle" aria-hidden="true" />
                 <span>Sign in</span>
               </button>
             </SignInButton>
@@ -123,7 +71,11 @@ export function MobileShell({ children }: { children: ReactNode }) {
 
       <main className="content">{children}</main>
 
-      <div id="sidebar" className={`sidebar ${open ? "open" : ""}`} aria-hidden={!open}>
+      <div
+        id="sidebar"
+        className={`sidebar ${open ? "open" : ""}`}
+        aria-hidden={!open}
+      >
         <button
           id="close-sidebar"
           className="close-sidebar-btn"
@@ -139,7 +91,10 @@ export function MobileShell({ children }: { children: ReactNode }) {
 
           {/* Provider pills + model dropdown */}
           <div className="sidebar-section" style={{ marginTop: "0.75rem" }}>
-            <div className="sidebar-label" style={{ fontSize: "0.85rem", opacity: 0.9, marginBottom: "0.35rem" }}>
+            <div
+              className="sidebar-label"
+              style={{ fontSize: "0.85rem", opacity: 0.9, marginBottom: "0.35rem" }}
+            >
               Provider
             </div>
 
@@ -161,7 +116,10 @@ export function MobileShell({ children }: { children: ReactNode }) {
               </button>
             </div>
 
-            <div className="sidebar-label" style={{ fontSize: "0.85rem", opacity: 0.9, margin: "0.75rem 0 0.35rem" }}>
+            <div
+              className="sidebar-label"
+              style={{ fontSize: "0.85rem", opacity: 0.9, margin: "0.75rem 0 0.35rem" }}
+            >
               Model
             </div>
 
@@ -180,10 +138,22 @@ export function MobileShell({ children }: { children: ReactNode }) {
             </select>
           </div>
 
+          {/* Optional: Gallery link pill (if you already have sidebar-pill styles) */}
+          <div style={{ marginTop: "1rem" }}>
+            <a href="/gallery" className="sidebar-pill">
+              <i className="bi bi-images" aria-hidden="true" />
+              <span style={{ marginLeft: "0.5rem" }}>Gallery</span>
+            </a>
+          </div>
+
           <SignedIn>
             <div style={{ marginTop: "1rem" }}>
-              <button type="button" className="sidebar-link" onClick={() => clerk.signOut({ redirectUrl: "/" })}>
-                <IconLogOut />
+              <button
+                type="button"
+                className="sidebar-link"
+                onClick={() => clerk.signOut({ redirectUrl: "/" })}
+              >
+                <i className="bi bi-box-arrow-right" aria-hidden="true" />
                 <span>Sign out</span>
               </button>
             </div>

@@ -57,6 +57,119 @@
   --tap-min: 44px;
 }
 
+
+
+/* ===========================
+   Universal Icon System
+   =========================== */
+
+:root {
+  --icon-size: 20px;          /* all icons same visual size */
+  --icon-tap: 36px;           /* all icon tap targets same size */
+  --icon-gap: 10px;           /* spacing between icons */
+  --icon-radius: 999px;
+
+  --icon-color: var(--Text);
+  --icon-border: var(--Borders);
+  --icon-glow: var(--Text-shadow);
+  --icon-boxglow: var(--Box-shadow);
+}
+
+/* Any bootstrap icon */
+i.bi {
+  font-size: var(--icon-size);
+  line-height: 1;
+  color: var(--icon-color);
+  filter: drop-shadow(0 0 6px var(--icon-glow));
+}
+
+/* Any SVG icon (keeps old ones consistent too) */
+.icon svg,
+.icon-button svg,
+.plus-btn svg,
+.user-menu-item svg {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  display: block;
+}
+
+/* Universal “icon-only clickable” wrapper */
+.icon,
+.bi-action,
+.icon-button {
+  width: var(--icon-tap);
+  height: var(--icon-tap);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--icon-radius);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  transition: transform 120ms ease, filter 120ms ease, border-color 120ms ease, opacity 120ms ease;
+}
+
+/* Remove button look globally, keep your pill buttons separate */
+.icon-button,
+.bi-action,
+.icon {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 0;
+}
+
+/* Hover / focus */
+.icon-button:hover,
+.bi-action:hover,
+.icon:hover {
+  border-color: var(--icon-border);
+  transform: scale(1.06);
+  filter: drop-shadow(0 0 10px var(--icon-boxglow));
+}
+
+.icon-button:focus-visible,
+.bi-action:focus-visible,
+.icon:focus-visible {
+  outline: 2px solid var(--icon-border);
+  outline-offset: 2px;
+}
+
+/* Disabled patterns */
+.icon-button:disabled,
+.bi-action[aria-disabled="true"],
+.icon[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+
+/* Studio / Gallery icon rows */
+.image-controls,
+.gallery-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
+}
+
+/* Like count text alignment */
+.like-count {
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  color: var(--Text);
+  filter: drop-shadow(0 0 6px var(--Text-shadow));
+}
+
+/* User menu avatar should match icon system */
+.icon-button .avatar {
+  width: calc(var(--icon-tap) - 6px);
+  height: calc(var(--icon-tap) - 6px);
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid var(--Borders);
+}
+
 /* =====================
    Base
 ===================== */
@@ -329,6 +442,44 @@ button,input,textarea,select{ font:inherit; }
   padding:10px;
 }
 
+/* =====================
+   Bootstrap Icons (icon-only controls)
+   Used when controls are rendered as <span role="button"><i class="bi ..."/></span>
+===================== */
+.image-controls [role="button"]{
+  width: var(--chip-size);
+  height: var(--chip-size);
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: var(--radius-pill);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color: var(--icon);
+  text-shadow: 0 0 10px var(--Text-shadow);
+  transition: transform 160ms ease, filter 160ms ease, opacity 160ms ease;
+}
+
+.image-controls .bi{
+  font-size: 22px;
+  line-height: 1;
+  display: inline-block;
+}
+
+.image-controls [role="button"]:hover{
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 10px var(--Text-shadow));
+}
+
+.image-controls [role="button"][aria-disabled="true"]{
+  opacity: 0.45;
+  filter: none;
+}
+
 .image-remix-btn,
 .image-download-btn,
 .image-delete-btn{
@@ -376,6 +527,113 @@ button,input,textarea,select{ font:inherit; }
   width:20px;
   height:20px;
 }
+
+/* ===========================
+   Gallery Bootstrap Icons
+   =========================== */
+
+.gallery-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.gallery-actions .bi-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  /* tap target without "button" look */
+  width: 34px;
+  height: 34px;
+
+  border: 1px solid transparent;
+  border-radius: 999px;
+
+  cursor: pointer;
+  user-select: none;
+
+  transition: transform 120ms ease, filter 120ms ease, border-color 120ms ease, opacity 120ms ease;
+}
+
+.gallery-actions .bi-action i.bi {
+  font-size: 20px;
+  line-height: 1;
+  color: var(--Text);
+  filter: drop-shadow(0 0 6px var(--Text-shadow));
+}
+
+/* hover glow */
+.gallery-actions .bi-action:hover {
+  border-color: var(--Borders);
+  transform: scale(1.06);
+  filter: drop-shadow(0 0 10px var(--Box-shadow));
+}
+
+/* disabled state from aria-disabled */
+.gallery-actions .bi-action[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* like count */
+.like-count {
+  font-size: 0.95rem;
+  color: var(--Text);
+  filter: drop-shadow(0 0 6px var(--Text-shadow));
+  padding: 0 2px;
+}
+
+/* Fullscreen modal layout (no inline styles) */
+.gallery-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.82);
+}
+
+.gallery-modal-inner {
+  width: min(1000px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.gallery-modal-img {
+  width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 0 18px var(--Box-shadow);
+  border: 1px solid var(--Borders);
+}
+
+.gallery-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.gallery-modal-text {
+  min-width: 0;
+}
+
+.gallery-modal-prompt {
+  font-weight: 600;
+  color: var(--Text);
+  filter: drop-shadow(0 0 6px var(--Text-shadow));
+}
+
+.gallery-modal-sub {
+  opacity: 0.85;
+  color: var(--Text);
+  }
 
 /* =====================
    Sidebar

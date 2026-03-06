@@ -1,34 +1,8 @@
-"use client";
+ "use client";
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useClerk, useUser } from "@clerk/nextjs";
-
-function IconUser(props: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="7" r="4" />
-      <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
-    </svg>
-  );
-}
-function IconCreditCard() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="2" y="5" width="20" height="14" rx="2" />
-      <path d="M2 10h20" />
-    </svg>
-  );
-}
-function IconLogOut() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
-  );
-}
 
 export function UserMenuButton() {
   const { user } = useUser();
@@ -60,27 +34,39 @@ export function UserMenuButton() {
           // eslint-disable-next-line @next/next/no-img-element
           <img className="avatar" src={user.imageUrl} alt="Account" />
         ) : (
-          <IconUser />
+          <i className="bi bi-person-circle"></i>
         )}
       </button>
 
       {open ? (
         <div className="user-menu-pop" role="menu" aria-label="Account actions">
-          <Link className="user-menu-item" role="menuitem" href="/billing" onClick={() => setOpen(false)}>
-            <IconCreditCard />
+          <Link
+            className="user-menu-item"
+            role="menuitem"
+            href="/billing"
+            onClick={() => setOpen(false)}
+          >
+            <i className="bi bi-credit-card"></i>
             <span>Billing</span>
           </Link>
-          <Link className="user-menu-item" role="menuitem" href="/account" onClick={() => setOpen(false)}>
-            <IconUser />
+
+          <Link
+            className="user-menu-item"
+            role="menuitem"
+            href="/account"
+            onClick={() => setOpen(false)}
+          >
+            <i className="bi bi-person"></i>
             <span>Account</span>
           </Link>
+
           <button
             className="user-menu-item"
             role="menuitem"
             type="button"
             onClick={() => clerk.signOut({ redirectUrl: "/" })}
           >
-            <IconLogOut />
+            <i className="bi bi-box-arrow-right"></i>
             <span>Sign out</span>
           </button>
         </div>
